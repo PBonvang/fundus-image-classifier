@@ -36,8 +36,8 @@ def copy_images(image_paths, dest):
             shutil.copy(image_path, image_dest)
 
 print("[INFO] loading training data...")
-image_paths = list(paths.list_images(config.SOURCE_PATH))\
-    [:256]# Else the program is killed, due to limited memory (8 GB)
+image_paths = list(paths.list_images(config.SOURCE_PATH)) #\
+    #[:1024]# Else the program is killed, due to limited memory (8 GB)
 np.random.shuffle(image_paths)
 
 val_len = int(len(image_paths) * config.VAL_SPLIT)

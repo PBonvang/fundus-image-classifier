@@ -15,7 +15,6 @@ from numpy import vstack
 from numpy import argmax
 from pandas import read_csv
 from sklearn.metrics import accuracy_score
-from torchvision.datasets import MNIST
 from torchvision.transforms import Compose
 from torchvision.transforms import ToTensor
 from torchvision.transforms import Normalize
@@ -42,14 +41,16 @@ class CNN(Module):
         self.act1 = ReLU()
         # first pooling layer
         self.pool1 = MaxPool2d((2,2), stride=(2,2))
+
         # second hidden layer
-        self.hidden2 = Conv2d(32, 32, (3,3))
-        kaiming_uniform_(self.hidden2.weight, nonlinearity='relu')
-        self.act2 = ReLU()
-        # second pooling layer
-        self.pool2 = MaxPool2d((2,2), stride=(2,2))
+        # self.hidden2 = Conv2d(32, 32, (3,3))
+        # kaiming_uniform_(self.hidden2.weight, nonlinearity='relu')
+        # self.act2 = ReLU()
+        # # second pooling layer
+        # self.pool2 = MaxPool2d((2,2), stride=(2,2))
+        
         # fully connected layer
-        self.hidden3 = Linear(54*54*32, 100)
+        self.hidden3 = Linear(111*111*32, 100)
         kaiming_uniform_(self.hidden3.weight, nonlinearity='relu')
         self.act3 = ReLU()
         # output layer
@@ -63,10 +64,12 @@ class CNN(Module):
         X = self.hidden1(X)
         X = self.act1(X)
         X = self.pool1(X)
+
         # second hidden layer
-        X = self.hidden2(X)
-        X = self.act2(X)
-        X = self.pool2(X)
+        # X = self.hidden2(X)
+        # X = self.act2(X)
+        # X = self.pool2(X)
+
         # flatten
         X = torch.flatten(X,1)
         # third hidden layer
@@ -83,7 +86,9 @@ def train_model(train_dl, model):
     criterion = CrossEntropyLoss()
     optimizer = SGD(model.parameters(), lr=config.LR, momentum=0.9)
     # enumerate epochs
-    for epoch in range(10):
+    for epoch in range(config.EPOCHS):
+        e_start = time.perf_counter()
+
         # enumerate mini batches
         for i, (inputs, targets) in enumerate(train_dl):
             # clear the gradients
@@ -96,6 +101,8 @@ def train_model(train_dl, model):
             loss.backward()
             # update model weights
             optimizer.step()
+        
+        print(f"Epoch: {epoch+1} Time: {time.perf_counter() - e_start:.2f}s Loss: {loss:.5f}")
 
 # evaluate the model
 def evaluate_model(test_dl, model):
@@ -119,7 +126,7 @@ def evaluate_model(test_dl, model):
     acc = accuracy_score(actuals, predictions)
     return acc
 
-training_tansform = transforms.Compose([
+training_tansforms = transforms.Compose([
 	transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
     transforms.Grayscale(),
 	transforms.RandomHorizontalFlip(),
@@ -127,26 +134,27 @@ training_tansform = transforms.Compose([
 	transforms.ToTensor(),
 	#transforms.Normalize(mean=config.MEAN, std=config.STD)
 ])
-validation_transform = transforms.Compose([
+validation_transforms = transforms.Compose([
 	transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
     transforms.Grayscale(),
 	transforms.ToTensor(),
 	#transforms.Normalize(mean=config.MEAN, std=config.STD)
 ])
 
-# create data loaders
+# Creating data loaders
 (training_ds, training_dl) = create_dataloader.get_dataloader(config.TRAIN,
-	transforms=training_tansform,
+	transforms=training_tansforms,
 	batch_size=config.FEATURE_EXTRACTION_BATCH_SIZE)
 (val_ds, val_dl) = create_dataloader.get_dataloader(config.VAL,
-	transforms=validation_transform,
-	batch_size=config.FEATURE_EXTRACTION_BATCH_SIZE, shuffle=False)
+	transforms=validation_transforms,
+	batch_size=1024, shuffle=False)
 
-# define the network
+# Defining network
 model = CNN(1)
 
-# # train the model
+print("[INFO] Training model")
 train_model(training_dl, model)
-# evaluate the model
+
+print("[INFO] Evaluating model")
 acc = evaluate_model(val_dl, model)
 print('Accuracy: %.3f' % acc)
