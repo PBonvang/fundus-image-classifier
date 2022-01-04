@@ -49,7 +49,7 @@ class CNN(Module):
         # second pooling layer
         self.pool2 = MaxPool2d((2,2), stride=(2,2))
         # fully connected layer
-        self.hidden3 = Linear(5*5*32, 100)
+        self.hidden3 = Linear(54*54*32, 100)
         kaiming_uniform_(self.hidden3.weight, nonlinearity='relu')
         self.act3 = ReLU()
         # output layer
@@ -68,7 +68,7 @@ class CNN(Module):
         X = self.act2(X)
         X = self.pool2(X)
         # flatten
-        X = X.view(-1, 4*4*50)
+        X = torch.flatten(X,1)
         # third hidden layer
         X = self.hidden3(X)
         X = self.act3(X)
@@ -81,7 +81,7 @@ class CNN(Module):
 def train_model(train_dl, model):
     # define the optimization
     criterion = CrossEntropyLoss()
-    optimizer = SGD(model.parameters(), lr=0.01, momentum=0.9)
+    optimizer = SGD(model.parameters(), lr=config.LR, momentum=0.9)
     # enumerate epochs
     for epoch in range(10):
         # enumerate mini batches

@@ -17,12 +17,12 @@ IMAGE_SIZE = 224
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # specify training hyperparameters
-FEATURE_EXTRACTION_BATCH_SIZE = 256
-FINETUNE_BATCH_SIZE = 64
+FEATURE_EXTRACTION_BATCH_SIZE = 32
+FINETUNE_BATCH_SIZE = 16
 PRED_BATCH_SIZE = 4
 EPOCHS = 20
-LR = 0.001
-LR_FINETUNE = 0.0005
+LR = 0.01
+LR_FINETUNE = 0.005
 
 # define paths to store training plots and trained model
 WARMUP_PLOT = os.path.join(BASE_PATH, "Output", "warmup.png")
