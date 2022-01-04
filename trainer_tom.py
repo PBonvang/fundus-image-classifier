@@ -106,17 +106,18 @@ with torch.no_grad():
         _, predicted = torch.max(outputs, 1)
         n_samples += labels.size(0)
         n_correct += (predicted == labels).sum().item()
+
         
-        for i in range(config.FEATURE_EXTRACTION_BATCH_SIZE):
-            label = labels[i]
-            pred = predicted[i]
-            if (label == pred):
-                n_class_correct[label] += 1
-            n_class_samples[label] += 1
+        # for i in range(config.FEATURE_EXTRACTION_BATCH_SIZE):
+        #     label = labels[i]
+        #     pred = predicted[i]
+        #     if (label == pred):
+        #         n_class_correct[label] += 1
+        #     n_class_samples[label] += 1
 
     acc = 100.0 * n_correct / n_samples
     print(f'Accuracy of the network: {acc} %')
 
-    for i in range(10):
-        acc = 100.0 * n_class_correct[i] / n_class_samples[i]
-        print(f'Accuracy of {classes[i]}: {acc} %')
+    # for i in range(10):
+    #     acc = 100.0 * n_class_correct[i] / n_class_samples[i]
+    #     print(f'Accuracy of {classes[i]}: {acc} %')
