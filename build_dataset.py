@@ -1,4 +1,3 @@
-#from pyimagesearch import config
 from imutils import paths
 import config
 from Utils import SAMPLE_TYPE
