@@ -30,6 +30,7 @@ def train_model(train_dl, model):
     # define the optimization
     optimizer = OPTIMIZER_F(model.parameters(), lr=config.LR, momentum=0.9)
 
+    model = model.to(config.DEVICE)
     n_steps = len(train_dl)
 
     for epoch in range(config.EPOCHS):
@@ -39,7 +40,6 @@ def train_model(train_dl, model):
         for i, (inputs, targets) in enumerate(train_dl):
             inputs = inputs.to(config.DEVICE)
             targets = targets.to(config.DEVICE)
-            model = model.to(config.DEVICE)
 
             # clear the gradients
             optimizer.zero_grad()
@@ -56,11 +56,12 @@ def train_model(train_dl, model):
         print(f"Epoch: [{epoch+1}/{config.EPOCHS}], Time: {time.perf_counter() - e_start:.2f}s")
 
 def evaluate_model(test_dl, model):
+    model = model.to('cpu')
     predictions, actuals = list(), list()
+
     for i, (inputs, targets) in enumerate(test_dl):
         inputs = inputs.to('cpu')
         targets = targets.to('cpu')
-        model = model.to('cpu')
 
         # evaluate the model on the test set
         yhat = model(inputs)
