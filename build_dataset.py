@@ -1,11 +1,10 @@
 from imutils import paths
 import config
-from Utils import SAMPLE_TYPE
+from utils.SampleType import SAMPLE_TYPE
 
 import numpy as np
 import shutil
 import os
-import pandas as pd
 
 def get_evenly_weigthed_classes_paths(image_paths):
     fundus_paths = list()
