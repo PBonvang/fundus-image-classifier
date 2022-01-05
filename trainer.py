@@ -38,6 +38,7 @@ def train_model(train_dl, model):
         for i, (inputs, targets) in enumerate(train_dl):
             inputs = inputs.to(config.DEVICE)
             targets = targets.to(config.DEVICE)
+            model = model.to(config.DEVICE)
 
             # clear the gradients
             optimizer.zero_grad()
@@ -56,8 +57,9 @@ def train_model(train_dl, model):
 def evaluate_model(test_dl, model):
     predictions, actuals = list(), list()
     for i, (inputs, targets) in enumerate(test_dl):
-        inputs = inputs.to(config.DEVICE)
-        targets = targets.to(config.DEVICE)
+        inputs = inputs.to('cpu')
+        targets = targets.to('cpu')
+        model = model.to('cpu')
 
         # evaluate the model on the test set
         yhat = model(inputs)
