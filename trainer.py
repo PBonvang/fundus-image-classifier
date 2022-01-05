@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import time
-import uuid
-import os
+from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 
 from numpy import vstack
 from numpy import argmax
@@ -22,46 +22,12 @@ from torch.nn import CrossEntropyLoss
 
 from Model import CNN
 
-CRITERION = CrossEntropyLoss()
-OPTIMIZER_F = SGD
-
-# train the model
-def train_model(train_dl, model):
-    # define the optimization
-    optimizer = OPTIMIZER_F(model.parameters(), lr=config.LR, momentum=0.9)
-
-    model = model.to(config.DEVICE)
-    n_steps = len(train_dl)
-
-    for epoch in range(config.EPOCHS):
-        e_start = time.perf_counter()
-
-        # Enumerate mini batches
-        for i, (inputs, targets) in enumerate(train_dl):
-            inputs = inputs.to(config.DEVICE)
-            targets = targets.to(config.DEVICE)
-
-            # clear the gradients
-            optimizer.zero_grad()
-            # compute the model output
-            yhat = model(inputs)
-            # calculate loss
-            loss = CRITERION(yhat, targets)
-            # credit assignment
-            loss.backward()
-            # update model weights
-            optimizer.step()
-            print(f"Epoch: [{epoch+1}/{config.EPOCHS}], Step: [{i+1}/{n_steps}] Loss: {loss.detach().item():.5f}")
-        
-        print(f"Epoch: [{epoch+1}/{config.EPOCHS}], Time: {time.perf_counter() - e_start:.2f}s")
-
 def evaluate_model(test_dl, model):
-    model = model.to('cpu')
     predictions, actuals = list(), list()
-
     for i, (inputs, targets) in enumerate(test_dl):
         inputs = inputs.to('cpu')
         targets = targets.to('cpu')
+        model = model.to('cpu')
 
         # evaluate the model on the test set
         yhat = model(inputs)
@@ -107,26 +73,92 @@ validation_transforms = transforms.Compose([
 # Defining network
 model = CNN(1)
 
+criterion = CrossEntropyLoss()
+optimizer = SGD(model.parameters(), lr=config.LR, momentum=0.9)
+
+def train_one_epoch(epoch_index, tb_writer):
+    running_loss = 0.
+    last_loss = 0.
+
+    # Here, we use enumerate(training_loader) instead of
+    # iter(training_loader) so that we can track the batch
+    # index and do some intra-epoch reporting
+    for i, data in enumerate(training_dl):
+        # Every data instance is an input + label pair
+        inputs, labels = data
+        inputs = inputs.to(config.DEVICE)
+        labels = labels.to(config.DEVICE)
+        global model
+        model = model.to(config.DEVICE)
+
+        # Zero your gradients for every batch!
+        optimizer.zero_grad()
+
+        # Make predictions for this batch
+        outputs = model(inputs)
+
+        # Compute the loss and its gradients
+        loss = criterion(outputs, labels)
+        loss.backward()
+
+        # Adjust learning weights
+        optimizer.step()
+        # Gather data and report
+        running_loss += loss.item()
+        if i % 200 == 199:
+            last_loss = running_loss / 200 # loss per batch
+            print(f'  Batch: [{i+1}/{len(training_dl)}], Loss: {last_loss:.5f}')
+            tb_x = epoch_index * len(training_dl) + i + 1
+            tb_writer.add_scalar('Loss/train', last_loss, tb_x)
+            running_loss = 0.
+
+    return last_loss
+
+
+timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+writer = SummaryWriter('runs/fashion_trainer_{}'.format(timestamp))
+epoch_number = 0
+
+
+best_vloss = 1_000_000.
 print("[INFO] Training model")
-train_model(training_dl, model)
+
+for epoch in range(config.EPOCHS):
+    e_start = time.perf_counter()
+    print(f'Epoch: [{epoch+1}/{config.EPOCHS}]')
+
+    # Make sure gradient tracking is on, and do a pass over the data
+    model.train(True)
+    avg_loss = train_one_epoch(epoch_number, writer)
+    # We don't need gradients on to do reporting
+    model.train(False)
+    model.cpu()
+
+    running_vloss = 0.0
+    for i, vdata in enumerate(val_dl):
+        vinputs, vlabels = vdata
+        voutputs = model(vinputs)
+        vloss = criterion(voutputs, vlabels)
+        running_vloss += vloss
+
+    avg_vloss = running_vloss / (i + 1)
+    print(f'Training loss: {avg_loss:.5f}, Validation loss: {avg_vloss:.5f}, Time: {time.perf_counter() - e_start:.2f}s')
+
+    # Log the running loss averaged per batch
+    # for both training and validation
+    writer.add_scalars('Training vs. Validation Loss',
+                    { 'Training' : avg_loss, 'Validation' : avg_vloss },
+                    epoch_number + 1)
+    writer.flush()
+
+    # Track best performance, and save the model's state
+    if avg_vloss < best_vloss:
+        best_vloss = avg_vloss
+        model_path = 'model_{}_{}'.format(timestamp, epoch_number)
+        torch.save(model.state_dict(), model_path)
+
+    epoch_number += 1
 
 print("[INFO] Evaluating model")
 acc = evaluate_model(val_dl, model)
-print(f'Accuracy: {acc*100:.5f} %')
-
-model_id = uuid.uuid4()
-model_path = os.path.join(config.MODEL_PATH, f"{model_id}.pth")
-torch.save(model.state_dict(), model_path)
-
-model_info = [
-    model_id,
-    model_path,
-    acc,
-    config.EPOCHS,
-    config.LR,
-    type(CRITERION).__name__,
-    type(OPTIMIZER_F).__name__
-    #model
-    ]
-with open(config.MODEL_INFO_FILE_PATH, "w") as info_file:
-    info_file.write("\n")
+print(f'Training accuracy: {acc*100:.5f} %')
