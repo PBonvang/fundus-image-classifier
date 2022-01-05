@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import time
+from sys import getsizeof
 
 from numpy import vstack
 from numpy import argmax
@@ -37,7 +38,7 @@ class CNN(Module):
         super(CNN, self).__init__()
         # input to first hidden layer
         self.hidden1 = Conv2d(n_channels, 32, (3,3))
-        kaiming_uniform_(self.hidden1.weight, nonlinearity='relu')
+        #kaiming_uniform_(self.hidden1.weight, nonlinearity='relu')
         self.act1 = ReLU()
         # first pooling layer
         self.pool1 = MaxPool2d((2,2), stride=(2,2))
@@ -50,12 +51,12 @@ class CNN(Module):
         # self.pool2 = MaxPool2d((2,2), stride=(2,2))
         
         # fully connected layer
-        self.hidden3 = Linear(111*111*32, 100)
-        kaiming_uniform_(self.hidden3.weight, nonlinearity='relu')
+        self.hidden3 = Linear(127*127*32, 100)
+        #kaiming_uniform_(self.hidden3.weight, nonlinearity='relu')
         self.act3 = ReLU()
         # output layer
         self.hidden4 = Linear(100, 2)
-        xavier_uniform_(self.hidden4.weight)
+        #xavier_uniform_(self.hidden4.weight)
         self.act4 = Softmax(dim=1)
  
     # forward propagate input
@@ -85,12 +86,18 @@ def train_model(train_dl, model):
     # define the optimization
     criterion = CrossEntropyLoss()
     optimizer = SGD(model.parameters(), lr=config.LR, momentum=0.9)
+
+    n_steps = len(train_dl)
+
     # enumerate epochs
     for epoch in range(config.EPOCHS):
         e_start = time.perf_counter()
 
         # enumerate mini batches
         for i, (inputs, targets) in enumerate(train_dl):
+            inputs = inputs.to(config.DEVICE)
+            targets = targets.to(config.DEVICE)
+
             # clear the gradients
             optimizer.zero_grad()
             # compute the model output
@@ -101,13 +108,16 @@ def train_model(train_dl, model):
             loss.backward()
             # update model weights
             optimizer.step()
+            print(f"Epoch: [{epoch+1}/{config.EPOCHS}], Step: [{i+1}/{n_steps}] Loss: {loss.detach().item():.5f}")
         
-        print(f"Epoch: {epoch+1} Time: {time.perf_counter() - e_start:.2f}s Loss: {loss:.5f}")
+        print(f"Epoch: [{epoch+1}/{config.EPOCHS}], Time: {time.perf_counter() - e_start:.2f}s")
 
-# evaluate the model
 def evaluate_model(test_dl, model):
     predictions, actuals = list(), list()
     for i, (inputs, targets) in enumerate(test_dl):
+        inputs = inputs.to(config.DEVICE)
+        targets = targets.to(config.DEVICE)
+
         # evaluate the model on the test set
         yhat = model(inputs)
         # retrieve numpy array
@@ -147,7 +157,7 @@ validation_transforms = transforms.Compose([
 	batch_size=config.FEATURE_EXTRACTION_BATCH_SIZE)
 (val_ds, val_dl) = create_dataloader.get_dataloader(config.VAL,
 	transforms=validation_transforms,
-	batch_size=1024, shuffle=False)
+	batch_size=512, shuffle=False)
 
 # Defining network
 model = CNN(1)
@@ -157,4 +167,6 @@ train_model(training_dl, model)
 
 print("[INFO] Evaluating model")
 acc = evaluate_model(val_dl, model)
-print('Accuracy: %.3f' % acc)
+print(f'Accuracy: {acc*100:.5f} %')
+
+torch.save(model.state_dict(), config.SAVE_PATH)
