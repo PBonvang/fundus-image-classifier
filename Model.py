@@ -7,11 +7,17 @@ from torch.nn import Softmax
 from torch.nn import Module
 from torch.nn.init import kaiming_uniform_
 from torch.nn.init import xavier_uniform_
+from torch.nn import CrossEntropyLoss
+from torch.optim import SGD
 
-class CNN(Module):
+class Model(Module):
+    loss_func = CrossEntropyLoss()
+    optimizer_func = SGD
+
+
     # define model elements
     def __init__(self, n_channels):
-        super(CNN, self).__init__()
+        super(Model, self).__init__()
         # input to first hidden layer
         self.hidden1 = Conv2d(n_channels, 32, (3,3))
         kaiming_uniform_(self.hidden1.weight, nonlinearity='relu')
