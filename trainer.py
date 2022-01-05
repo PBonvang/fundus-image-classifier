@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import time
+import uuid
+import os
 
 from numpy import vstack
 from numpy import argmax
@@ -20,21 +22,20 @@ from torch.nn import CrossEntropyLoss
 
 from Model import CNN
 
-
+CRITERION = CrossEntropyLoss()
+OPTIMIZER_F = SGD
 
 # train the model
 def train_model(train_dl, model):
     # define the optimization
-    criterion = CrossEntropyLoss()
-    optimizer = SGD(model.parameters(), lr=config.LR, momentum=0.9)
+    optimizer = OPTIMIZER_F(model.parameters(), lr=config.LR, momentum=0.9)
 
     n_steps = len(train_dl)
 
-    # enumerate epochs
     for epoch in range(config.EPOCHS):
         e_start = time.perf_counter()
 
-        # enumerate mini batches
+        # Enumerate mini batches
         for i, (inputs, targets) in enumerate(train_dl):
             inputs = inputs.to(config.DEVICE)
             targets = targets.to(config.DEVICE)
@@ -44,7 +45,7 @@ def train_model(train_dl, model):
             # compute the model output
             yhat = model(inputs)
             # calculate loss
-            loss = criterion(yhat, targets)
+            loss = CRITERION(yhat, targets)
             # credit assignment
             loss.backward()
             # update model weights
@@ -110,4 +111,19 @@ print("[INFO] Evaluating model")
 acc = evaluate_model(val_dl, model)
 print(f'Accuracy: {acc*100:.5f} %')
 
-torch.save(model.state_dict(), config.SAVE_PATH)
+model_id = uuid.uuid4()
+model_path = os.path.join(config.MODEL_PATH, f"{model_id}.pth")
+torch.save(model.state_dict(), model_path)
+
+model_info = [
+    model_id,
+    model_path,
+    acc,
+    config.EPOCHS,
+    config.LR,
+    type(CRITERION).__name__,
+    type(OPTIMIZER_F).__name__
+    #model
+    ]
+with open(config.MODEL_INFO_FILE_PATH, "w") as info_file:
+    info_file.write("\n")

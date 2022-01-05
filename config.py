@@ -6,8 +6,9 @@ import datetime
 BASE_PATH = "/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage"
 DATA_PATH = os.path.join(BASE_PATH, "Data")
 SOURCE_PATH = os.path.join(BASE_PATH, "Images")
-MODEL_PATH = os.path.join(BASE_PATH, "Models")
-SAVE_PATH = os.path.join(MODEL_PATH, f"{datetime.datetime.now():%d_%m_%Y__%H_%M_%S}.pth")
+MODEL_PATH = "./Models"
+MODEL_INFO_FILE_PATH = os.path.join(MODEL_PATH, "model_info.csv")
+#SAVE_PATH = os.path.join(MODEL_PATH, f"{datetime.datetime.now():%d_%m_%Y__%H_%M_%S}.pth")
 
 # define paths to separate train and test
 VAL_SPLIT = 0.1

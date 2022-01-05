@@ -1,20 +1,10 @@
-from numpy import vstack
-from numpy import argmax
 import torch
-from pandas import read_csv
-from sklearn.metrics import accuracy_score
-from torchvision.transforms import Compose
-from torchvision.transforms import ToTensor
-from torchvision.transforms import Normalize
-from torch.utils.data import DataLoader
 from torch.nn import Conv2d
 from torch.nn import MaxPool2d
 from torch.nn import Linear
 from torch.nn import ReLU
 from torch.nn import Softmax
 from torch.nn import Module
-from torch.optim import SGD
-from torch.nn import CrossEntropyLoss
 from torch.nn.init import kaiming_uniform_
 from torch.nn.init import xavier_uniform_
 
@@ -24,7 +14,7 @@ class CNN(Module):
         super(CNN, self).__init__()
         # input to first hidden layer
         self.hidden1 = Conv2d(n_channels, 32, (3,3))
-        #kaiming_uniform_(self.hidden1.weight, nonlinearity='relu')
+        kaiming_uniform_(self.hidden1.weight, nonlinearity='relu')
         self.act1 = ReLU()
         # first pooling layer
         self.pool1 = MaxPool2d((2,2), stride=(2,2))
@@ -38,11 +28,11 @@ class CNN(Module):
         
         # fully connected layer
         self.hidden3 = Linear(127*127*32, 100)
-        #kaiming_uniform_(self.hidden3.weight, nonlinearity='relu')
+        kaiming_uniform_(self.hidden3.weight, nonlinearity='relu')
         self.act3 = ReLU()
         # output layer
         self.hidden4 = Linear(100, 2)
-        #xavier_uniform_(self.hidden4.weight)
+        xavier_uniform_(self.hidden4.weight)
         self.act4 = Softmax(dim=1)
  
     # forward propagate input
