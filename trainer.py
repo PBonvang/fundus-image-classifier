@@ -1,14 +1,7 @@
 import shutil
-from torch.utils import data
 import config
 import create_dataloader
-from imutils import paths
-from torchvision.models import resnet50
 from torchvision import transforms
-from tqdm import tqdm
-from torch import nn
-import matplotlib.pyplot as plt
-import numpy as np
 import torch
 import time
 import os
@@ -84,8 +77,8 @@ train_model(training_dl, model)
 print("[INFO] Training finished\n")
 
 print("[INFO] Evaluating model")
-acc = evaluate_model(val_dl, model)
-print(f'Accuracy: {acc*100:.5f} %')
+acc = evaluate_model(val_dl, model)*100
+print(f'Accuracy: {acc:.5f} %')
 print("[INFO] Evaluation finished\n")
 
 print("[INFO] Saving model")
@@ -102,7 +95,7 @@ if not os.path.exists(config.MODEL_INFO_FILE_PATH):
         info_file.write(f"{header}\n")
         info_file.write(str(metadata))
 else:
-    with open(config.MODEL_INFO_FILE_PATH, "w") as info_file:
+    with open(config.MODEL_INFO_FILE_PATH, "a") as info_file:
         info_file.write(f"\n{metadata}")
 
 print("[INFO] Saved successfully")
