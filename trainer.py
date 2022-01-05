@@ -74,15 +74,19 @@ print("[INFO] Loading dataset")
                                                     transforms=validation_transforms,
                                                     batch_size=config.FEATURE_EXTRACTION_BATCH_SIZE, shuffle=False)
 
+print("[INFO] Dataset loaded succesfully")
+
 # Defining network
 model = Model(1)
 
 print("[INFO] Training model")
 train_model(training_dl, model)
+print("[INFO] Training finished\n")
 
 print("[INFO] Evaluating model")
 acc = evaluate_model(val_dl, model)
 print(f'Accuracy: {acc*100:.5f} %')
+print("[INFO] Evaluation finished\n")
 
 print("[INFO] Saving model")
 metadata = ModelMetadata(model, acc, config)
@@ -100,3 +104,5 @@ if not os.path.exists(config.MODEL_INFO_FILE_PATH):
 else:
     with open(config.MODEL_INFO_FILE_PATH, "w") as info_file:
         info_file.write(f"\n{metadata}")
+
+print("[INFO] Saved successfully")
