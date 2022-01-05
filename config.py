@@ -6,8 +6,9 @@ import datetime
 BASE_PATH = "/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage"
 DATA_PATH = os.path.join(BASE_PATH, "Data")
 SOURCE_PATH = os.path.join(BASE_PATH, "Images")
-MODEL_PATH = "./Models"
-MODEL_INFO_FILE_PATH = os.path.join(MODEL_PATH, "model_info.csv")
+MODELS_PATH = "./Models"
+MODEL_CLASS = "./Model.py"
+MODEL_INFO_FILE_PATH = os.path.join(MODELS_PATH, "model_info.csv")
 #SAVE_PATH = os.path.join(MODEL_PATH, f"{datetime.datetime.now():%d_%m_%Y__%H_%M_%S}.pth")
 
 # define paths to separate train and test
@@ -24,7 +25,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 FEATURE_EXTRACTION_BATCH_SIZE = 128
 FINETUNE_BATCH_SIZE = 32
 PRED_BATCH_SIZE = 4
-EPOCHS = 5
+EPOCHS = 1
 LR = 0.001
 LR_FINETUNE = 0.0005
 
