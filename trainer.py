@@ -122,23 +122,23 @@ print("[INFO] Loading dataset")
                                                     transforms=validation_transforms,
                                                     batch_size=config.FEATURE_EXTRACTION_BATCH_SIZE, shuffle=False)
 
-print("[INFO] Dataset loaded succesfully")
+print("[INFO] Dataset loaded succesfully\n")
 
 # Defining network
 model = Model(1)
 
 print("[INFO] Training model")
 best_model = train_model(model, training_dl, val_dl)
-model = Model(1).load_state_dict(best_model)
+model.load_state_dict(best_model)
 print("[INFO] Training finished\n")
 
 print("[INFO] Evaluating model")
-acc = evaluate_model(val_dl, model)*100
+acc = evaluate_model(model,val_dl)*100
 print(f'Accuracy: {acc:.5f} %')
 print("[INFO] Evaluation finished\n")
 
 print("[INFO] Saving model")
-metadata = ModelMetadata(Model(), acc, config)
+metadata = ModelMetadata(model, acc, config)
 torch.save(model.state_dict(), metadata.model_path)
 
 # Copy model blueprint

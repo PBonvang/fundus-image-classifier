@@ -3,14 +3,13 @@ from numpy import vstack
 from numpy import argmax
 from sklearn.metrics import accuracy_score
 
-def evaluate_model(val_dl, model):
-    model = model.to('cpu')
+from Model import Model
+
+def evaluate_model(model:Model, val_dl):
+    model = model.cpu()
     predictions, actuals = list(), list()
 
-    for i, (inputs, targets) in enumerate(val_dl):
-        inputs = inputs.to('cpu')
-        targets = targets.to('cpu')
-
+    for (inputs, targets) in val_dl:
         # evaluate the model on the test set
         yhat = model(inputs)
         # retrieve numpy array
