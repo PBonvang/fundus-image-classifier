@@ -6,6 +6,7 @@ from sklearn.metrics import accuracy_score
 from Model import Model
 
 def evaluate_model(model:Model, val_dl):
+    model.eval()
     model = model.cpu()
     predictions, actuals = list(), list()
 

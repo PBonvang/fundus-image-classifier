@@ -7,6 +7,7 @@ class ModelMetadata:
         "Id",
         "Accuracy",
         "Epochs",
+        "Batch_size",
         "Learning_rate",
         "Loss_func",
         "Optimizer_func",
@@ -19,6 +20,7 @@ class ModelMetadata:
         self.class_path = os.path.join(config.MODELS_PATH, f"{self.id}.py")
         self.accuracy = accuracy
         self.epochs = config.EPOCHS
+        self.batch_size = config.FEATURE_EXTRACTION_BATCH_SIZE
         self.learning_rate = config.LR
         self.loss_func = type(model.loss_func).__name__
         self.optimizer_func = model.optimizer_func.__name__
@@ -29,6 +31,7 @@ class ModelMetadata:
             self.id,
             self.accuracy,
             self.epochs,
+            self.batch_size,
             self.learning_rate,
             self.loss_func,
             self.optimizer_func,
