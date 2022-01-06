@@ -22,11 +22,11 @@ IMAGE_SIZE = 256
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # specify training hyperparameters
-FEATURE_EXTRACTION_BATCH_SIZE = 128
-FINETUNE_BATCH_SIZE = 32
+FEATURE_EXTRACTION_BATCH_SIZE = 16
+FINETUNE_BATCH_SIZE = 4
 PRED_BATCH_SIZE = 4
-EPOCHS = 1
-LR = 0.001
+EPOCHS = 2
+LR = 0.0001
 LR_FINETUNE = 0.0005
 
 # define paths to store training plots and trained model
