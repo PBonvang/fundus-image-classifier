@@ -68,9 +68,9 @@ class Network(Module):
 class Model(IModel):
     # SET MODEL ATTRIBUTES HERE:
     loss_func = BCEWithLogitsLoss()
-    optimizer_func = SGD
-    epochs = 1
-    batch_size = 4
+    optimizer_func = Adam
+    epochs = 10
+    batch_size = 16
     lr = 0.001
 
     training_transforms = transforms.Compose([
