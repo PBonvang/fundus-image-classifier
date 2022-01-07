@@ -7,13 +7,15 @@ BASE_PATH = "/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject
 DATA_PATH = os.path.join(BASE_PATH, "Data")
 SOURCE_PATH = os.path.join(BASE_PATH, "Images")
 MODELS_PATH = "./Models"
-MODEL_CLASS = "./Model.py"
-MODEL_INFO_FILE_PATH = os.path.join(MODELS_PATH, "model_info.csv")
+MODEL_FILE = "./Model.py"
+MODELS_INFO_FILE_PATH = os.path.join(MODELS_PATH, "model_info.csv")
 #SAVE_PATH = os.path.join(MODEL_PATH, f"{datetime.datetime.now():%d_%m_%Y__%H_%M_%S}.pth")
 
 # define paths to separate train and test
 VAL_SPLIT = 0.1
+TRAIN_INFO = os.path.join(BASE_PATH, "train.csv")
 TRAIN = os.path.join(DATA_PATH, "train")
+VAL_INFO = os.path.join(BASE_PATH, "validation.csv")
 VAL = os.path.join(DATA_PATH, "validation")
 
 IMAGE_SIZE = 256

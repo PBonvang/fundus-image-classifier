@@ -25,7 +25,7 @@ class ModelMetadata:
         self.epochs = model.epochs
         self.batch_size = model.batch_size
         self.learning_rate = model.lr
-        self.loss_func = type(model.loss_f).__name__
+        self.loss_func = type(model.loss_func).__name__
         self.optimizer_func = model.optimizer_func.__name__
         self.timestamp = datetime.datetime.now()
     

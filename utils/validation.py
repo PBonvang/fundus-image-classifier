@@ -8,4 +8,5 @@ def model_is_valid(model: IModel) -> bool:
         and not model.batch_size == None
         and not model.lr == None
         and not model.optimizer == None
+        and not model.network == None
     )

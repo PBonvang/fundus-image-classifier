@@ -1,6 +1,6 @@
 from torch.nn import Module
 
-class IModel(Module):
+class IModel:
     loss_func = None
     optimizer_func = None
     epochs = None
@@ -10,3 +10,5 @@ class IModel(Module):
     optimizer = None
     training_transforms = None
     validation_transforms = None
+
+    network: Module = None

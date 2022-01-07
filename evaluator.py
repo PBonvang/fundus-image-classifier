@@ -7,11 +7,11 @@ from numpy import vstack
 from numpy import argmax
 from sklearn.metrics import accuracy_score
 
-from Model import Model
+from NetworkModel import NetworkModel
 import create_dataloader
 from utils.evaluation import evaluate_model
 
-model = Model(1)
+model = NetworkModel(1)
 model_path = os.path.join(config.MODELS_PATH, "05_01_2022__11_28_34.pth")
 model.load_state_dict(torch.load(model_path))
 model.eval()
