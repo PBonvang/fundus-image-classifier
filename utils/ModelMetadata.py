@@ -1,6 +1,7 @@
 import uuid
 import os
 import datetime
+import Model
 
 class ModelMetadata:
     serialization_attributes = [
@@ -22,8 +23,8 @@ class ModelMetadata:
         self.epochs = config.EPOCHS
         self.batch_size = config.FEATURE_EXTRACTION_BATCH_SIZE
         self.learning_rate = config.LR
-        self.loss_func = type(model.loss_func).__name__
-        self.optimizer_func = model.optimizer_func.__name__
+        self.loss_func = type(Model.LOSS_FUNC).__name__
+        self.optimizer_func = Model.OPTIMIZER_FUNC.__name__
         self.timestamp = datetime.datetime.now()
     
     def __str__(self) -> str:
