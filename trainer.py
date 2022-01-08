@@ -62,7 +62,7 @@ metadata = ModelMetadata(model, acc)
 torch.save(model.network.state_dict(), metadata.model_path)
 
 # Copy model blueprint
-shutil.copy(config.MODEL_FILE, metadata.class_path)
+shutil.copy(config.MODEL_DEF, metadata.class_path)
 
 # Add metadata to model info file
 if not os.path.exists(config.MODELS_INFO_FILE_PATH):

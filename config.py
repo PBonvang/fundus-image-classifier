@@ -6,8 +6,9 @@ import datetime
 BASE_PATH = "/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage"
 DATA_PATH = os.path.join(BASE_PATH, "Data")
 SOURCE_PATH = os.path.join(BASE_PATH, "Images")
-MODELS_PATH = "./Models"
-MODEL_FILE = "./Model.py"
+MODELS_PATH = "./models"
+TRAINED_MODELS_PATH = "./trained_models"
+MODEL_DEF = "./Model.py"
 MODELS_INFO_FILE_PATH = os.path.join(MODELS_PATH, "model_info.csv")
 #SAVE_PATH = os.path.join(MODEL_PATH, f"{datetime.datetime.now():%d_%m_%Y__%H_%M_%S}.pth")
 

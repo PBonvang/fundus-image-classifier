@@ -19,7 +19,7 @@ class ModelMetadata:
 
     def __init__(self, model: IModel, accuracy):
         self.id = str(uuid.uuid4())
-        self.model_path = os.path.join(config.MODELS_PATH, f"{self.id}.pth")
+        self.model_path = os.path.join(config.TRAINED_MODELS_PATH, f"{self.id}.pth")
         self.class_path = os.path.join(config.MODELS_PATH, f"{self.id}.py")
         self.accuracy = accuracy
         self.epochs = model.epochs
