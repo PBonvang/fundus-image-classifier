@@ -13,9 +13,7 @@ MODELS_INFO_FILE_PATH = os.path.join(MODELS_PATH, "model_info.csv")
 
 # define paths to separate train and test
 VAL_SPLIT = 0.1
-TRAIN_INFO = os.path.join(BASE_PATH, "train.csv")
 TRAIN = os.path.join(DATA_PATH, "train")
-VAL_INFO = os.path.join(BASE_PATH, "validation.csv")
 VAL = os.path.join(DATA_PATH, "validation")
 
 IMAGE_SIZE = 256
@@ -36,3 +34,10 @@ WARMUP_PLOT = os.path.join(BASE_PATH, "Output", "warmup.png")
 FINETUNE_PLOT = os.path.join(BASE_PATH, "Output", "finetune.png")
 WARMUP_MODEL = os.path.join(BASE_PATH, "Output", "warmup_model.pth")
 FINETUNE_MODEL = os.path.join(BASE_PATH, "Output", "finetune_model.pth")
+
+###########################################################
+#                   SUPER SETTINGS                        #
+###########################################################
+ON_SUPER_COM = False
+TRAIN_INFO = os.path.join(BASE_PATH, "train.csv")
+VAL_INFO = os.path.join(BASE_PATH, "validation.csv")

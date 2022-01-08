@@ -1,7 +1,6 @@
 import shutil
 import config
-import create_dataloader
-from torchvision import transforms
+from utils.dataloading import get_super_dataloader, get_sample_dataloader
 import torch
 import time
 import os
@@ -26,14 +25,27 @@ if not model_is_valid(model):
         f"Model is missing attributes. Please define missing attributes and try again. Required attributes are defined in the {IModel.__name__} interface.")
 
 print("[INFO] Loading dataset")
-(training_ds, training_dl) = create_dataloader.get_dataloader(
-    config.TRAIN,
-    transforms=model.training_transforms,
-    batch_size=model.batch_size)
-(val_ds, val_dl) = create_dataloader.get_dataloader(
-    config.VAL,
-    transforms=model.validation_transforms,
-    batch_size=model.batch_size, shuffle=False)
+training_ds = training_dl = val_ds = val_dl = None
+if config.ON_SUPER_COM:
+    (training_ds, training_dl) = get_super_dataloader(
+        config.TRAIN_INFO,
+        config.TRAIN,
+        transforms=model.training_transforms,
+        batch_size=model.batch_size)
+    (val_ds, val_dl) = get_super_dataloader(
+        config.VAL_INFO,
+        config.VAL,
+        transforms=model.validation_transforms,
+        batch_size=model.batch_size)
+else:
+    (training_ds, training_dl) = get_sample_dataloader(
+        config.TRAIN,
+        transforms=model.training_transforms,
+        batch_size=model.batch_size)
+    (val_ds, val_dl) = get_sample_dataloader(
+        config.VAL,
+        transforms=model.validation_transforms,
+        batch_size=model.batch_size, shuffle=False)
 print("[INFO] Dataset loaded succesfully\n")
 
 print("[INFO] Training model")
