@@ -34,8 +34,51 @@ class Network(Module):
     def __init__(self, n_channels):
         super(Network, self).__init__()
 
-    def forward(self, x):
+        # input to first hidden layer
+        self.hidden1 = Conv2d(n_channels, 32, (3,3))
+        kaiming_uniform_(self.hidden1.weight, nonlinearity='relu')
+        self.act1 = ReLU()
+        # first pooling layer
+        self.pool1 = MaxPool2d((2,2), stride=(2,2))
+
+        # second hidden layer
+        self.hidden2 = Conv2d(32, 32, (3,3))
+        kaiming_uniform_(self.hidden2.weight, nonlinearity='relu')
+        self.act2 = ReLU()
+        # second pooling layer
+        self.pool2 = MaxPool2d((2,2), stride=(2,2))
         
+        # fully connected layer
+        self.hidden3 = Linear(62*62*32, 100)
+        kaiming_uniform_(self.hidden3.weight, nonlinearity='relu')
+        self.act3 = ReLU()
+        
+        # output layer
+        self.hidden4 = Linear(100, 1)
+        xavier_uniform_(self.hidden4.weight)
+        self.act4 = Sigmoid()
+
+    # forward propagate input
+    def forward(self, x):
+        # input to first hidden layer
+        x = self.hidden1(x)
+        x = self.act1(x)
+        x = self.pool1(x)
+
+        # second hidden layer
+        x = self.hidden2(x)
+        x = self.act2(x)
+        x = self.pool2(x)
+
+        # flatten
+        x = torch.flatten(x,1)
+        # third hidden layer
+        x = self.hidden3(x)
+        x = self.act3(x)
+        # output layer
+        x = self.hidden4(x)
+        x = self.act4(x)
+        x = torch.squeeze(x)
         return x
 # END NETWORK DEFINITION
 

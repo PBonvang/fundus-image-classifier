@@ -10,7 +10,6 @@ MODELS_PATH = "./models"
 TRAINED_MODELS_PATH = "./trained_models"
 MODEL_DEF = "./Model.py"
 MODELS_INFO_FILE_PATH = os.path.join(MODELS_PATH, "model_info.csv")
-#SAVE_PATH = os.path.join(MODEL_PATH, f"{datetime.datetime.now():%d_%m_%Y__%H_%M_%S}.pth")
 
 # define paths to separate train and test
 VAL_SPLIT = 0.1
@@ -24,11 +23,9 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # specify training hyperparameters
 FEATURE_EXTRACTION_BATCH_SIZE = 16
-FINETUNE_BATCH_SIZE = 4
 PRED_BATCH_SIZE = 4
 EPOCHS = 2
 LR = 0.0001
-LR_FINETUNE = 0.0005
 
 # define paths to store training plots and trained model
 WARMUP_PLOT = os.path.join(BASE_PATH, "Output", "warmup.png")
