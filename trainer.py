@@ -15,7 +15,7 @@ from utils.training import train_model
 from utils.validation import model_is_valid
 
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-tb_writer = SummaryWriter(f'runs/fashion_trainer_{timestamp}')
+tb_writer = SummaryWriter(f'runs/isFundus{timestamp}')
 
 # Defining network
 model = get_model()

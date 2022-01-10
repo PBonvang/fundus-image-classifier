@@ -2,6 +2,9 @@ import config
 import torch
 import time
 import os
+import math
+import torch.nn.functional as F
+from sklearn.metrics import accuracy_score
 from datetime import datetime
 
 from utils.IModel import IModel
@@ -14,7 +17,8 @@ def train_model(
         tb_writer):
     best_vloss = 1_000_000.
     best_net = None
-
+    images, labels = next(iter(train_dl))
+    #tb_writer.add_graph(model, images)
     for epoch in range(model.epochs):
         e_start = time.perf_counter()
         print(f'Epoch: [{epoch+1}/{model.epochs}]')
@@ -40,7 +44,7 @@ def train_model(
 
         # Log the running loss averaged per batch
         # for both training and validation
-        tb_writer.add_scalars('Training vs. Validation Loss',
+        tb_writer.add_scalars('Training vs Validation Loss',
                               {'Training': avg_loss, 'Validation': avg_vloss},
                               epoch + 1)
         tb_writer.flush()
@@ -61,6 +65,7 @@ def train_one_epoch(
     running_loss = 0.
     last_loss = 0.
     n_steps = len(train_dl)
+    writer_precision = math.ceil(n_steps/10)
     network = model.network.to(config.DEVICE)
 
     # Here, we use enumerate(training_loader) instead of
@@ -88,11 +93,11 @@ def train_one_epoch(
         running_loss += loss.detach().item()
         print(f"Step: [{i+1}/{n_steps}]")
 
-        if i % 200 == 199:
-            last_loss = running_loss / 200  # loss per batch
+        if (i+1) % writer_precision == 0:
+            last_loss = running_loss / writer_precision  # loss per batch
             print(f'  Batch: [{i+1}/{n_steps}], Loss: {last_loss:.5f}')
             tb_x = epoch_index * n_steps + i + 1
-            tb_writer.add_scalar('Loss/train', last_loss, tb_x)
+            tb_writer.add_scalar('Training loss', last_loss, tb_x)
             running_loss = 0.
 
     return last_loss
