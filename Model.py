@@ -1,6 +1,5 @@
 import torch
 
-from imutils import paths
 from torch.nn.modules.activation import Sigmoid
 from torch.nn.modules.loss import BCELoss
 from torchvision.models import resnet50
@@ -34,23 +33,36 @@ class Network(Module):
     def __init__(self, n_channels):
         super(Network, self).__init__()
 
+        resnet = models.resnet50(pretrained=True)
+        self.features = nn.ModuleList(resnet.children())[:-1]
+        self.features = nn.Sequential(*self.features)
+
+        in_features = resnet.fc.in_features
+        self.fc = nn.Sequential(
+            nn.Linear(in_features, 1)
+        )
+
     def forward(self, x):
-        
+        x = self.features(x)
+        x = torch.flatten(x,1)
+        x = self.fc(x)
+
+        x = torch.flatten(x)
         return x
 # END NETWORK DEFINITION
 
 # DEFINE MODEL HERE
 class Model(IModel):
     # SET MODEL ATTRIBUTES HERE:
-    loss_func = BCEWithLogitsLoss()
+    loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor([3.492063492]).to(config.DEVICE))
     optimizer_func = Adam
-    epochs = 5
+    epochs = 10
     batch_size = 16
     lr = 0.001
 
     training_transforms = transforms.Compose([
         transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
-        transforms.Grayscale(),
+        # transforms.Grayscale(),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(90),
         transforms.ToTensor(),
@@ -59,7 +71,7 @@ class Model(IModel):
 
     validation_transforms = transforms.Compose([
         transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
-        transforms.Grayscale(),
+        # transforms.Grayscale(),
         transforms.ToTensor(),
         #transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
@@ -67,6 +79,7 @@ class Model(IModel):
 
     def __init__(self, network):
         super(Model, self).__init__()
+        network = network.to(config.DEVICE)
 
         self.network = network
         self.optimizer = self.optimizer_func(
@@ -77,7 +90,14 @@ class Model(IModel):
 
 def get_model() -> IModel:
     # INSTANTIATE MODEL HERE:
-    network = Network(1)
+    network = Network(3)
+
+    for param in network.parameters():
+        param.requires_grad = False
+
+    for param in network.fc.parameters():
+        param.requires_grad = True
+
     model = Model(network)
     # END MODEL INSTANTIATION
 
