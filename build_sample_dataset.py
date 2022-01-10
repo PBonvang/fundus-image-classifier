@@ -6,26 +6,6 @@ import numpy as np
 import shutil
 import os
 
-def get_evenly_weigthed_classes_paths(image_paths):
-    fundus_paths = list()
-    non_fundus_paths = list()
-    for path in image_paths:
-        if path == 'nan':
-            continue
-
-        image_name = path.split(os.path.sep)[-1]
-        image_type = SAMPLE_TYPE.to_sample_type(image_name)
-        if image_type == SAMPLE_TYPE.FUNDUS:
-            fundus_paths.append(path)
-        else:
-            non_fundus_paths.append(path)
-
-    m = int(np.ceil(len(fundus_paths)/len(non_fundus_paths)))
-    non_fundus_paths = (non_fundus_paths*m)[:len(fundus_paths)]
-    evenly_weighted_paths = fundus_paths + non_fundus_paths
-
-    return evenly_weighted_paths
-
 def copy_images(image_paths, dest):
     # check if the destination folder exists and if not create it
     if os.path.exists(dest):
@@ -60,14 +40,13 @@ def copy_images(image_paths, dest):
 
 print("[INFO] loading training data...")
 image_paths = list(paths.list_images(config.SOURCE_PATH))
-evenly_weighted_paths = get_evenly_weigthed_classes_paths(image_paths)
-np.random.shuffle(evenly_weighted_paths)
+np.random.shuffle(image_paths)
 
-val_len = int(len(evenly_weighted_paths) * config.VAL_SPLIT)
-train_len = len(evenly_weighted_paths) - val_len
+val_len = int(len(image_paths) * config.VAL_SPLIT)
+train_len = len(image_paths) - val_len
 
-training_paths = evenly_weighted_paths[:train_len]
-validation_paths = evenly_weighted_paths[train_len:]
+training_paths = image_paths[:train_len]
+validation_paths = image_paths[train_len:]
 
 print("[INFO] copying training and test images...")
 copy_images(training_paths, config.TRAIN)

@@ -25,12 +25,11 @@ def train_model(
             model, train_dl, epoch, tb_writer)
         # We don't need gradients on to do reporting
         model.network.eval()
-        model.network.cpu()
 
         running_vloss = 0.0
         for (vinputs, vlabels) in val_dl:
-            vinputs = vinputs.float()
-            vlabels = vlabels.float()
+            vinputs = vinputs.to(config.DEVICE).float()
+            vlabels = vlabels.to(config.DEVICE).float()
             voutputs = model.network(vinputs)
             vloss = model.loss_func(voutputs, vlabels)
             running_vloss += vloss.detach().item()

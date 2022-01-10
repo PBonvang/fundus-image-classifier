@@ -11,7 +11,6 @@ def get_super_dataloader(info_file, data_dir, transforms, batch_size, shuffle=Tr
         
     loader = DataLoader(ds, batch_size=batch_size,
         shuffle=shuffle,
-        num_workers=os.cpu_count(),
         pin_memory=True if config.DEVICE == "cuda" else False)
 
     return (ds, loader)
@@ -24,7 +23,6 @@ def get_sample_dataloader(data_dir, transforms, batch_size, shuffle=True, limit=
 		
 	loader = DataLoader(ds, batch_size=batch_size,
 		shuffle=shuffle,
-		num_workers=os.cpu_count(),
 		pin_memory=True if config.DEVICE == "cuda" else False)
 	
 	return (ds, loader)
