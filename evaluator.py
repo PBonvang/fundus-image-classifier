@@ -7,8 +7,6 @@ from numpy import vstack
 from numpy import argmax
 from sklearn.metrics import accuracy_score
 
-from NetworkModel import NetworkModel
-import create_dataloader
 from utils.evaluation import evaluate_model
 
 model = NetworkModel(1)
@@ -17,7 +15,7 @@ model.load_state_dict(torch.load(model_path))
 model.eval()
 
 validation_transforms = transforms.Compose([
-	transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
+	transforms.Resize((config.IMAGE_SHAPE, config.IMAGE_SHAPE)),
     transforms.Grayscale(),
 	transforms.ToTensor(),
 	#transforms.Normalize(mean=config.MEAN, std=config.STD)

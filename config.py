@@ -16,7 +16,7 @@ VAL_SPLIT = 0.1
 TRAIN = os.path.join(DATA_PATH, "train")
 VAL = os.path.join(DATA_PATH, "validation")
 
-IMAGE_SIZE = 256
+IMAGE_SHAPE = (256,256)
 
 # determine the device to be used for training and evaluation
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"

@@ -92,7 +92,7 @@ class Model(IModel):
     lr = 0.001
 
     training_transforms = transforms.Compose([
-        transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
+        transforms.Resize(config.IMAGE_SHAPE),
         transforms.Grayscale(),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(90),
@@ -101,7 +101,7 @@ class Model(IModel):
     ])
 
     validation_transforms = transforms.Compose([
-        transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
+        transforms.Resize(config.IMAGE_SHAPE),
         transforms.Grayscale(),
         transforms.ToTensor(),
         #transforms.Normalize(mean=config.MEAN, std=config.STD)

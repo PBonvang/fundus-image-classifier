@@ -57,12 +57,12 @@ class Model(IModel):
     loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor([3.492063492]).to(config.DEVICE))
     optimizer_func = Adam
     epochs = 10
-    batch_size = 16
+    batch_size = 128
     lr = 0.001
 
     training_transforms = transforms.Compose([
-        transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
-        # transforms.Grayscale(),
+        transforms.Resize(config.IMAGE_SHAPE),
+        transforms.Grayscale(),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(90),
         transforms.ToTensor(),
@@ -70,8 +70,8 @@ class Model(IModel):
     ])
 
     validation_transforms = transforms.Compose([
-        transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
-        # transforms.Grayscale(),
+        transforms.Resize(config.IMAGE_SHAPE),
+        transforms.Grayscale(),
         transforms.ToTensor(),
         #transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])

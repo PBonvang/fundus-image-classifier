@@ -20,5 +20,7 @@ This info file was designed to be used as a pandas dataframe or with excel to pr
 Sample: ```pos_weight=torch.tensor([3.492063492]).to(config.DEVICE)```
 Full: ```pos_weight=torch.tensor([0.366838129]).to(config.DEVICE)```
 
+pos_weight = num_neg_samples / num_pos_samples
+
 ## References
 - Setting up a transfer learning network: https://discuss.pytorch.org/t/how-can-i-replace-the-forward-method-of-a-predefined-torchvision-model-with-my-customized-forward-function/54224/7
