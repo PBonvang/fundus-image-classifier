@@ -3,9 +3,11 @@ import torch
 import time
 import os
 import math
+import torchvision
 import torch.nn.functional as F
 from sklearn.metrics import accuracy_score
 from datetime import datetime
+import sys
 
 from utils.IModel import IModel
 
@@ -17,8 +19,9 @@ def train_model(
         tb_writer):
     best_vloss = 1_000_000.
     best_net = None
-    images, labels = next(iter(train_dl))
-    #tb_writer.add_graph(model, images)
+    example_images, example_labels = next(iter(train_dl))
+    tb_writer.add_image('Example fundus pictures', torchvision.utils.make_grid(example_images))
+    tb_writer.add_graph(model.network.to('cpu'), example_images)
     for epoch in range(model.epochs):
         e_start = time.perf_counter()
         print(f'Epoch: [{epoch+1}/{model.epochs}]')
@@ -44,10 +47,9 @@ def train_model(
 
         # Log the running loss averaged per batch
         # for both training and validation
-        tb_writer.add_scalars('Training vs Validation Loss',
-                              {'Training': avg_loss, 'Validation': avg_vloss},
-                              epoch + 1)
-        tb_writer.flush()
+        tb_writer.add_scalar('Loss epoch/train', avg_loss, epoch+1)
+        tb_writer.add_scalar('Loss epoch/test', avg_vloss, epoch+1)
+        tb_writer.close()
 
         # Track best performance, and save the model's state
         if avg_vloss < best_vloss:
@@ -64,6 +66,7 @@ def train_one_epoch(
         tb_writer):
     running_loss = 0.
     last_loss = 0.
+    running_correct = 0
     n_steps = len(train_dl)
     writer_precision = math.ceil(n_steps/10)
     network = model.network.to(config.DEVICE)
@@ -91,13 +94,20 @@ def train_one_epoch(
 
         # Gather data and report
         running_loss += loss.detach().item()
+
+        running_correct += (torch.round(F.sigmoid(outputs)) == labels).sum().detach().item()
         print(f"Step: [{i+1}/{n_steps}]")
 
         if (i+1) % writer_precision == 0:
+            print(running_correct)
             last_loss = running_loss / writer_precision  # loss per batch
+            last_correct = running_correct / (writer_precision * len(labels))
             print(f'  Batch: [{i+1}/{n_steps}], Loss: {last_loss:.5f}')
             tb_x = epoch_index * n_steps + i + 1
             tb_writer.add_scalar('Training loss', last_loss, tb_x)
+            tb_writer.add_scalar('Training accuracy', last_correct, tb_x)
+            tb_writer.close()
             running_loss = 0.
+            running_correct = 0
 
     return last_loss
