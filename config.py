@@ -3,7 +3,7 @@ import os
 import datetime
 
 # define path to the original dataset and base path to the dataset
-BASE_PATH = "/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage"
+BASE_PATH = "./IsFundusImage"
 DATA_PATH = os.path.join(BASE_PATH, "Data")
 SOURCE_PATH = os.path.join(BASE_PATH, "Images")
 MODELS_PATH = "./models"

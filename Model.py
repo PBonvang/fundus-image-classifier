@@ -1,5 +1,6 @@
 import torch
 
+from imutils import paths
 from torch.nn.modules.activation import Sigmoid
 from torch.nn.modules.loss import BCELoss
 from torchvision.models import resnet50
@@ -20,14 +21,11 @@ from torch.nn.init import kaiming_uniform_
 from torch.nn.init import xavier_uniform_
 from torch.nn import CrossEntropyLoss
 from torch.nn import BCEWithLogitsLoss
-from torch.optim import SGD
+from torch.optim import SGD, adam
 from torch.optim import Adam
 
 from utils.IModel import IModel
 import config
-
-# DEFINE NETWORK HERE:
-
 
 class Network(Module):
     def __init__(self, n_channels):
@@ -41,11 +39,14 @@ class Network(Module):
         self.fc = nn.Sequential(
             nn.Linear(in_features, 1)
         )
+        
+
 
     def forward(self, x):
         x = self.features(x)
         x = torch.flatten(x,1)
         x = self.fc(x)
+        
 
         x = torch.flatten(x)
         return x
@@ -54,7 +55,7 @@ class Network(Module):
 # DEFINE MODEL HERE
 class Model(IModel):
     # SET MODEL ATTRIBUTES HERE:
-    loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor([3.492063492]).to(config.DEVICE))
+    loss_func = BCEWithLogitsLoss()
     optimizer_func = Adam
     epochs = 10
     batch_size = 16
@@ -79,7 +80,6 @@ class Model(IModel):
 
     def __init__(self, network):
         super(Model, self).__init__()
-        network = network.to(config.DEVICE)
 
         self.network = network
         self.optimizer = self.optimizer_func(
