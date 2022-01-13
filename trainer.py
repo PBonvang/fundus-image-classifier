@@ -1,11 +1,14 @@
 import shutil
 import config
-from utils.dataloading import get_super_dataloader, get_sample_dataloader
+from utils.dataloading import get_dataset
 import torch
-import time
 import os
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
+from torch.utils.data.dataloader import DataLoader
+from torch.utils.data.sampler import SubsetRandomSampler
+import utils.dataloading as dataloading
+from sklearn.model_selection import KFold
 
 from Model import get_model
 from utils.IModel import IModel
@@ -25,27 +28,21 @@ if not model_is_valid(model):
         f"Model is missing attributes. Please define missing attributes and try again. Required attributes are defined in the {IModel.__name__} interface.")
 
 print("[INFO] Loading dataset")
-training_ds = training_dl = val_ds = val_dl = None
-if config.ON_SUPER_COM:
-    (training_ds, training_dl) = get_super_dataloader(
-        config.TRAIN_INFO,
-        config.TRAIN,
-        transforms=model.training_transforms,
-        batch_size=model.batch_size)
-    (val_ds, val_dl) = get_super_dataloader(
-        config.VAL_INFO,
-        config.VAL,
-        transforms=model.validation_transforms,
-        batch_size=model.batch_size)
-else:
-    (training_ds, training_dl) = get_sample_dataloader(
-        config.TRAIN,
-        transforms=model.training_transforms,
-        batch_size=model.batch_size)
-    (val_ds, val_dl) = get_sample_dataloader(
-        config.VAL,
-        transforms=model.validation_transforms,
-        batch_size=model.batch_size, shuffle=False)
+training_ds = get_dataset(config.TRAIN_INFO, config.TRAIN, model.training_transforms)
+kfold = KFold(n_splits=10, shuffle=True)
+
+train_ids, val_ids = next(kfold.split(training_ds), None)
+
+training_dl = DataLoader(
+        training_ds,
+        batch_size=model.batch_size,
+        sampler=SubsetRandomSampler(train_ids)
+    )
+val_dl = DataLoader(
+    training_ds,
+    batch_size=model.batch_size,
+    sampler=SubsetRandomSampler(val_ids)
+    )
 print("[INFO] Dataset loaded succesfully\n")
 
 print("[INFO] Training model")

@@ -10,7 +10,7 @@ from torch import nn
 import matplotlib.pyplot as plt
 import numpy as np
 
-from torch.nn import Conv2d, BatchNorm2d, Flatten, Sequential
+from torch.nn import Conv2d
 from torch.nn import MaxPool2d
 from torch.nn import Linear
 from torch.nn import ReLU
@@ -50,90 +50,73 @@ class Network(Module):
     def __init__(self, trial: Trial):
         super(Network, self).__init__()
 
-        self.blur = nn.Conv2d(in_channels=1, out_channels=1, kernel_size=3, padding=1, bias=False, stride=1)
-        self.blur.weight = nn.Parameter(torch.ones((1,1,3,3))/9.0)
+        n_conv_layers = trial.suggest_int('n_conv_layers', 1, 7)
+        n_lin_layers = trial.suggest_int('n_lin_layers', 0, 3)
+        layers = []
 
-        conv_layers = []
-
+        in_features = 1
         in_shape = config.IMAGE_SHAPE
-        layer_1_features = trial.suggest_categorical("n_layer_1_features", [4,8,16,32,64])
-        # Layer 1
-        conv_layers.extend([
-            Conv2d(1,layer_1_features,3),
-            BatchNorm2d(layer_1_features),
-            ReLU(),
-            MaxPool2d((2,2))
+        for i in range(n_conv_layers):
+            out_features = trial.suggest_int(f"n_units_conv_l{i}", 10, 128)
+            kernal_size = trial.suggest_int(f"kernal_size_conv_l{i}", 1, 7)
+            max_pooling = trial.suggest_int(f"max_pooling_conv_l{i}", 0, 1)
+
+            layers.extend([
+                nn.Conv2d(in_features, out_features,
+                          kernel_size=kernal_size, padding=1),
+                nn.BatchNorm2d(out_features),
+                nn.ReLU()])
+
+            in_shape = conv_output_shape(in_shape, kernal_size, pad=1)
+            if max_pooling:
+                layers.append(nn.MaxPool2d(2))
+                in_shape = (np.ceil(in_shape[0]/2), np.ceil(in_shape[0]/2))
+
+            in_features = out_features
+
+        dp = trial.suggest_float(f'conv_to_lin_dropout', 0.2, 0.5)
+
+        layers.extend([
+            nn.MaxPool2d(4),
+            nn.Flatten(),
+            nn.Dropout(dp)
         ])
 
-        in_shape = conv_output_shape(in_shape, 3)
-        in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
+        in_shape = (np.ceil(in_shape[0]/4), np.ceil(in_shape[0]/4))
 
-        layer_2_features = trial.suggest_categorical("n_layer_2_features", [32,64,128,256])
-        # Layer 2
-        conv_layers.extend([
-            Conv2d(layer_1_features,layer_2_features,3),
-            BatchNorm2d(layer_2_features),
-            ReLU(),
-            MaxPool2d((2,2))
+        in_features = int(np.prod(in_shape))*in_features
+
+        for i in range(n_lin_layers):
+            out_features = trial.suggest_int(f'n_units_l{i}', 64, 1024)
+            layers.extend([
+                nn.Linear(in_features, out_features),
+                nn.ReLU()
+            ])
+
+            in_features = out_features
+
+        # Classifier
+        layers.extend([
+            nn.Linear(in_features, 1),
+            nn.Sigmoid()
         ])
 
-
-        in_shape = conv_output_shape(in_shape, 3)
-        in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
-
-
-        layer_3_features = trial.suggest_categorical("n_layer_3_features", [32,64,128,256,512])
-        # Layer 3
-        conv_layers.extend([
-            Conv2d(layer_2_features,layer_3_features,3),
-            BatchNorm2d(layer_3_features),
-            ReLU(),
-            MaxPool2d((2,2))
-        ])
-
-        self.conv_layers = Sequential(*conv_layers)
-        lin_layers = []
-
-        in_shape = conv_output_shape(in_shape, 3)
-        in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
-
-        in_features = int(np.prod(in_shape))*layer_3_features
-        layer_4_features = trial.suggest_categorical("n_layer_4_features", [10,30,50,70,90,110])
-
-        # Layer 4
-        lin_layers.extend([
-            Flatten(),
-            Linear(in_features, layer_4_features),
-            Linear(layer_4_features,1),
-            Sigmoid()
-        ])
-
-        self.lin_layers = Sequential(*lin_layers)
-        self.layers = Sequential(
-            self.conv_layers,
-            self.lin_layers
-        )
+        self.layers = nn.Sequential(*layers)
 
     def forward(self, x):
-        x = self.blur(x)
-        x = self.conv_layers(x)
-        x = self.lin_layers(x)
-        x = torch.squeeze(x)
+        for layer in self.layers:
+            x = layer(x)
+            print(x.shape, layer)
 
+        x = torch.flatten(x)
         return x
-
-    def reset_weights(self):
-        for layer in self.layers.children():
-            if hasattr(layer, 'reset_parameters'):
-                layer.reset_parameters()
-
 # END NETWORK DEFINITION
 
 # DEFINE MODEL HERE
 class HyperModel(IModel):
     # SET MODEL ATTRIBUTES HERE:
     loss_func = BCEWithLogitsLoss(
-        pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
+        pos_weight=torch.tensor([3.492063492]).to(config.DEVICE))
 
     training_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
@@ -162,6 +145,6 @@ class HyperModel(IModel):
             'optimizer', ['Adam', 'RMSprop', 'SGD'])
         self.lr = trial.suggest_float('lr', 1e-5, 1e-1, log=True)
         self.optimizer = getattr(torch.optim, optimizer_name)(
-            network.layers.parameters(), lr=self.lr)
+            network.parameters(), lr=self.lr)
 
 # END MODEL DEFINITION

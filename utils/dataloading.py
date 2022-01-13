@@ -1,6 +1,7 @@
 import config
 from torch.utils.data import DataLoader, Subset
 from utils.SuperImageDataset import SuperImageDataset
+from utils.SampleDataset import SampleDataset
 from torchvision import datasets
 import os
 
@@ -26,3 +27,8 @@ def get_sample_dataloader(data_dir, transforms, batch_size, shuffle=True, limit=
 		pin_memory=True if config.DEVICE == "cuda" else False)
 	
 	return (ds, loader)
+
+def get_dataset(info_file, data_dir, transforms):
+	ds = SampleDataset(info_file, data_dir, transforms)
+
+	return ds
