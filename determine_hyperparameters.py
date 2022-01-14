@@ -20,7 +20,7 @@ from optuna.study import StudyDirection
 from HyperModel import HyperModel
 import config
 from utils.training import train_one_epoch
-from utils.evaluation import conv_v
+from utils.evaluation import get_sum_of_correct_predictions
 
 if not os.path.exists(config.STUDIES_PATH):
     os.makedirs(config.STUDIES_PATH)
@@ -100,10 +100,7 @@ def objective(trial: Trial):
             loss = model.loss_func(output, target)
             val_loss.append(loss.detach().item())
 
-            pred = output.cpu()
-            target = target.cpu()
-            pred = conv_v(pred)
-            correct += (pred == target.numpy()).sum().item()
+            correct += get_sum_of_correct_predictions(output, target)
 
     avg_loss = sum(val_loss)/len(val_loss)
     accuracy = correct / min(len(test_dl.dataset), BATCH_SIZE*N_VALID_EXAMPLES)

@@ -7,6 +7,7 @@ import torchvision
 from torch.utils.data.dataloader import DataLoader
 
 from utils.IModel import IModel
+from utils.evaluation import get_sum_of_correct_predictions
 
 
 def train_model(
@@ -98,8 +99,7 @@ def train_one_epoch(
         # Gather data and report
         running_loss += loss.detach().item()
 
-        running_correct += (torch.round(torch.sigmoid(outputs))
-                            == labels).sum().detach().item()
+        running_correct += get_sum_of_correct_predictions(outputs, labels)
         if config.DEBUG: print(f"  Step: [{i+1}/{n_steps}]")
 
         if (i+1) % writer_precision == 0:
