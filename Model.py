@@ -1,5 +1,6 @@
 import torch
 
+from imutils import paths
 from torch.nn.modules.activation import Sigmoid
 from torch.nn.modules.loss import BCELoss
 from torchvision.models import resnet50
