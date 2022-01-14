@@ -13,7 +13,7 @@ def image_loader(path: str):
         return img.convert("RGB")
 
 
-class SampleDataset(Dataset):
+class FundusDataset(Dataset):
     def __init__(self, annotations_file, dataset_path, transform=None, target_transform=None):
         self.img_info = pd.read_csv(annotations_file)
         self.dataset_path = dataset_path
