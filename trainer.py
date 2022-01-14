@@ -6,9 +6,6 @@ import os
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 from torch.utils.data.dataloader import DataLoader
-from torch.utils.data.sampler import SubsetRandomSampler
-import utils.dataloading as dataloading
-from sklearn.model_selection import KFold
 
 from Model import get_model
 from utils.IModel import IModel
@@ -29,28 +26,21 @@ if not model_is_valid(model):
 
 print("[INFO] Loading dataset")
 training_ds = get_dataset(config.TRAIN_INFO, config.TRAIN, model.training_transforms)
-kfold = KFold(n_splits=10, shuffle=True)
+test_ds = get_dataset(config.TEST_INFO, config.TEST, model.validation_transforms)
 
-train_ids, val_ids = next(kfold.split(training_ds), None)
-
-training_dl = DataLoader(
-        training_ds,
-        batch_size=model.batch_size,
-        sampler=SubsetRandomSampler(train_ids)
-    )
-val_dl = DataLoader(
-    training_ds,
+test_dl = DataLoader(
+    test_ds,
     batch_size=model.batch_size,
-    sampler=SubsetRandomSampler(val_ids)
+    shuffle=True
     )
 print("[INFO] Dataset loaded succesfully\n")
 
 print("[INFO] Training model")
-train_model(model, training_dl, val_dl, tb_writer)
+train_model(model, training_ds, test_dl, tb_writer)
 print("[INFO] Training finished\n")
 
 print("[INFO] Evaluating model")
-acc = evaluate_model(model, val_dl)*100
+acc = evaluate_model(model, test_dl)*100
 print(f'Accuracy: {acc:.5f} %')
 print("[INFO] Evaluation finished\n")
 

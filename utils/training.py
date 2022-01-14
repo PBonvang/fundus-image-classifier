@@ -1,26 +1,24 @@
 import config
 import torch
 import time
-import os
 import math
 import torchvision
-import torch.nn.functional as F
-from sklearn.metrics import accuracy_score
-from datetime import datetime
-import sys
+
+from torch.utils.data.dataloader import DataLoader
 
 from utils.IModel import IModel
 
 
 def train_model(
         model: IModel,
-        train_dl,
-        val_dl,
+        train_ds,
+        test_dl,
         tb_writer):
     best_vloss = 1_000_000.
     best_net = None
-    example_images, example_labels = next(iter(train_dl))
-    tb_writer.add_image('Example fundus pictures', torchvision.utils.make_grid(example_images))
+    example_images, example_labels = next(iter(test_dl))
+    tb_writer.add_image('Example fundus pictures',
+                        torchvision.utils.make_grid(example_images))
     tb_writer.add_graph(model.network.to('cpu'), example_images)
     for epoch in range(model.epochs):
         e_start = time.perf_counter()
@@ -28,20 +26,25 @@ def train_model(
 
         # Make sure gradient tracking is on, and do a pass over the data
         model.network.train(True)
+        train_dl = DataLoader(
+            train_ds,
+            batch_size=model.batch_size,
+            shuffle=True
+        )
         avg_loss = train_one_epoch(
             model, train_dl, epoch, tb_writer)
         # We don't need gradients on to do reporting
         model.network.eval()
 
         running_vloss = 0.0
-        for (vinputs, vlabels) in val_dl:
+        for (vinputs, vlabels) in test_dl:
             vinputs = vinputs.to(config.DEVICE).float()
             vlabels = vlabels.to(config.DEVICE).float()
             voutputs = model.network(vinputs)
             vloss = model.loss_func(voutputs, vlabels)
             running_vloss += vloss.detach().item()
 
-        avg_vloss = running_vloss / len(val_dl)
+        avg_vloss = running_vloss / len(test_dl)
         print(
             f'Training loss: {avg_loss:.5f}, Validation loss: {avg_vloss:.5f}, Time: {time.perf_counter() - e_start:.2f}s')
 
@@ -95,14 +98,14 @@ def train_one_epoch(
         # Gather data and report
         running_loss += loss.detach().item()
 
-        running_correct += (torch.round(F.sigmoid(outputs)) == labels).sum().detach().item()
-        print(f"Step: [{i+1}/{n_steps}]")
+        running_correct += (torch.round(torch.sigmoid(outputs))
+                            == labels).sum().detach().item()
+        print(f"  Step: [{i+1}/{n_steps}]")
 
         if (i+1) % writer_precision == 0:
-            print(running_correct)
             last_loss = running_loss / writer_precision  # loss per batch
             last_correct = running_correct / (writer_precision * len(labels))
-            print(f'  Batch: [{i+1}/{n_steps}], Loss: {last_loss:.5f}')
+            print(f'  Step: [{i+1}/{n_steps}], Loss: {last_loss:.5f}')
             tb_x = epoch_index * n_steps + i + 1
             tb_writer.add_scalar('Training loss', last_loss, tb_x)
             tb_writer.add_scalar('Training accuracy', last_correct, tb_x)
