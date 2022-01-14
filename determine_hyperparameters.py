@@ -68,6 +68,7 @@ def objective(trial: Trial):
         )
         avg_loss = train_one_epoch(model, train_dl, epoch, tb_writer)
         trial.report(avg_loss, epoch)
+        tb_writer.add_scalar('Loss epoch/train', avg_loss, epoch)
 
         # Handle pruning based on the intermediate value.
         if trial.should_prune():
@@ -106,7 +107,7 @@ def objective(trial: Trial):
 
     if config.DEBUG: print(f"Accuracy: {accuracy*100}")
 
-    print(f"Trial execution time: {time.perf_counter() - trial_start:.2}s")
+    print(f"Trial execution time: {(time.perf_counter() - trial_start)/60:.2f} min")
     return avg_loss
 
 
