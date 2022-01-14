@@ -1,6 +1,8 @@
 __pycache__
+.vscode
 
 **/trained_models
 **/Data
 **/Images
 **/runs
+**/studies
