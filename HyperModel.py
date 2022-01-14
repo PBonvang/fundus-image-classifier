@@ -1,13 +1,9 @@
 import torch
 
 from torch.nn.modules.activation import Sigmoid
-from torch.nn.modules.loss import BCELoss
-from torchvision.models import resnet50
 import torchvision.models as models
 from torchvision import transforms
-from tqdm import tqdm
 from torch import nn
-import matplotlib.pyplot as plt
 import numpy as np
 
 from torch.nn import Conv2d, BatchNorm2d, Flatten, Sequential
@@ -16,14 +12,9 @@ from torch.nn import Linear
 from torch.nn import ReLU
 from torch.nn import Softmax
 from torch.nn import Module
-from torch.nn.init import kaiming_uniform_
-from torch.nn.init import xavier_uniform_
 from torch.nn import CrossEntropyLoss
 from torch.nn import BCEWithLogitsLoss
-from torch.optim import SGD
-from torch.optim import Adam
 import torch.optim
-import optuna
 from optuna import Trial
 
 from utils.IModel import IModel
@@ -147,7 +138,7 @@ class HyperModel(IModel):
 
         optimizer_name = trial.suggest_categorical(
             'optimizer', ['Adam', 'RMSprop', 'SGD'])
-        self.lr = trial.suggest_float('lr', 1e-5, 1e-2, log=True)
+        self.lr = trial.suggest_float('lr', 1e-6, 1e-3, log=True)
         self.optimizer = getattr(torch.optim, optimizer_name)(
             self.network.layers.parameters(), lr=self.lr)
 

@@ -4,9 +4,7 @@ import sys
 import time
 
 import numpy as np
-from torch.nn.modules.loss import BCEWithLogitsLoss
 from torch.utils.data.dataloader import DataLoader
-from torch.utils.data.sampler import SubsetRandomSampler
 import utils.dataloading as dataloading
 import torch
 import os
@@ -29,25 +27,24 @@ if not os.path.exists(config.STUDIES_PATH):
 EPOCHS = 50
 BATCH_SIZE = 64
 N_VALID_EXAMPLES = 1000
-N_TRIALS = 10
+N_TRIALS = 100
 
 optuna.logging.get_logger("optuna").addHandler(
     logging.StreamHandler(sys.stdout))
-study_name = "50epoch-64bs"
+study_name = "50epochs-64bs"
 storage_name = f"sqlite:///{config.STUDIES_PATH}/{study_name}.db"
 
-trial_n = 0
+
 def objective(trial: Trial):
     trial_start = time.perf_counter()
-    global trial_n
-    print(f"Trial: [{trial_n+1}/{N_TRIALS}]")
-    trial_n += 1
-    
+    print(f"Trial: [{trial.number +1}/{N_TRIALS}]")
+
     model = HyperModel(trial)
     network = model.network
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    tb_writer = SummaryWriter(f'runs/studies/{study_name}/Trial{trial_n}_{timestamp}')
-    
+    tb_writer = SummaryWriter(
+        f'runs/studies/{study_name}/Trial{trial.number}_{timestamp}')
+
     if config.DEBUG:
         print(f"""
     Parameters:
@@ -64,7 +61,7 @@ def objective(trial: Trial):
         if config.DEBUG:
             print(f"    Epoch [{epoch+1}/{EPOCHS}]")
         network.train()
-        
+
         train_dl = DataLoader(
             training_ds,
             batch_size=BATCH_SIZE
@@ -94,9 +91,10 @@ def objective(trial: Trial):
             # Limiting validation data.
             if batch_idx == N_VALID_EXAMPLES:
                 break
-            data, target = data.to(config.DEVICE), target.to(config.DEVICE).float()
+            data = data.to(config.DEVICE)
+            target = target.to(config.DEVICE).float()
             output = network(data)
-            
+
             loss = model.loss_func(output, target)
             val_loss.append(loss.detach().item())
 
@@ -107,7 +105,7 @@ def objective(trial: Trial):
     trial.set_user_attr("Accuracy", accuracy)
 
     if config.DEBUG: print(f"Accuracy: {accuracy*100}")
-    
+
     print(f"Trial execution time: {time.perf_counter() - trial_start:.2}s")
     return avg_loss
 
@@ -115,7 +113,8 @@ def objective(trial: Trial):
 if __name__ == "__main__":
     study = optuna.create_study(study_name=study_name, storage=storage_name,
                                 direction=StudyDirection.MINIMIZE, load_if_exists=True)
-    study.optimize(objective, n_trials=N_TRIALS)
+
+    study.optimize(objective, n_trials=N_TRIALS, gc_after_trial=True)
 
     pruned_trials = study.get_trials(
         deepcopy=False, states=[TrialState.PRUNED])
