@@ -3,9 +3,9 @@ import os
 import datetime
 
 # define path to the original dataset and base path to the dataset
-BASE_PATH = "M:\Datasets\IsFundus-5k"
-DATA_PATH = "M:\Datasets\IsFundus-5k"
-SOURCE_PATH = os.path.join("M:\Datasets\IsFundus 2022-01-05 13-42", "train")
+BASE_PATH = "/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage/"
+DATA_PATH = os.path.join(BASE_PATH, "Data","clean")
+SOURCE_PATH = os.path.join(BASE_PATH, "Images")
 MODELS_PATH = "./models"
 TRAINED_MODELS_PATH = "./trained_models"
 MODEL_DEF = "./Model.py"
@@ -17,9 +17,9 @@ TRAIN = os.path.join(DATA_PATH, "training_data")
 VAL = os.path.join(DATA_PATH, "validation")
 
 TEST_INFO = os.path.join(BASE_PATH, "test.csv")
-TRAIN_INFO = os.path.join(DATA_PATH, "train.csv")
+TRAIN_INFO = os.path.join(BASE_PATH, "train.csv")
 
-IMAGE_SHAPE = (224, 179)
+IMAGE_SHAPE = (256, 256)
 
 # determine the device to be used for training and evaluation
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"

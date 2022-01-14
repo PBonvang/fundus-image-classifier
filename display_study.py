@@ -1,7 +1,7 @@
 import optuna
 from optuna.study import StudyDirection
 
-study_name = "thomas-study"
+study_name = "thomas-study-100epochs-2fold"
 storage_name = f"sqlite:///{study_name}.db"
 study = optuna.create_study(study_name=study_name, storage=storage_name, direction=StudyDirection.MAXIMIZE, load_if_exists=True)
 

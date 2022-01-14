@@ -19,22 +19,22 @@ import config
 from utils.evaluation import conv_v
 
 # Configuration
-KFOLDS = 5
-EPOCHS = 5
+KFOLDS = 2
+EPOCHS = 100
 BATCH_SIZE = 64
-N_TRAIN_EXAMPLES = 100
-N_VALID_EXAMPLES = 20
-N_TRIALS = 1000
+N_TRAIN_EXAMPLES = 10000
+N_VALID_EXAMPLES = 2000
+N_TRIALS = 10
 DEBUG = False
 
 optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
-study_name = "thomas-study"
+study_name = "thomas-study-100epochs-2fold"
 storage_name = f"sqlite:///{study_name}.db"
 
 trial_n = 0
 def objective(trial: Trial):
     global trial_n
-    print(f"Trial: {trial_n}")
+    print(f"Trial: [{trial_n}/{N_TRIALS-1}]")
     trial_n += 1
     model = HyperModel(trial)
     network = model.network
@@ -109,7 +109,7 @@ def objective(trial: Trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(study_name=study_name, storage=storage_name, direction=StudyDirection.MAXIMIZE, load_if_exists=True)
-    study.optimize(objective, n_trials=N_TRIALS, timeout=600)
+    study.optimize(objective, n_trials=N_TRIALS)
 
     pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])

@@ -28,21 +28,7 @@ from optuna import Trial
 
 from utils.IModel import IModel
 import config
-
-"""
-Utility function for computing output of convolutions
-takes a tuple of (h,w) and returns a tuple of (h,w)
-
-Creds:
-https://discuss.pytorch.org/t/utility-function-for-calculating-the-shape-of-a-conv-output/11173/7
-"""
-def conv_output_shape(h_w, kernel_size=1, stride=1, pad=0, dilation=1):
-    from math import floor
-    if type(kernel_size) is not tuple:
-        kernel_size = (kernel_size, kernel_size)
-    h = floor( ((h_w[0] + (2 * pad) - ( dilation * (kernel_size[0] - 1) ) - 1 )/ stride) + 1)
-    w = floor( ((h_w[1] + (2 * pad) - ( dilation * (kernel_size[1] - 1) ) - 1 )/ stride) + 1)
-    return h, w
+from utils.model import conv_output_shape
 
 # DEFINE NETWORK HERE:
 
@@ -68,7 +54,7 @@ class Network(Module):
         in_shape = conv_output_shape(in_shape, 3)
         in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
 
-        layer_2_features = trial.suggest_categorical("n_layer_2_features", [32,64,128,256])
+        layer_2_features = trial.suggest_categorical("n_layer_2_features", [16,32,64,128,256])
         # Layer 2
         conv_layers.extend([
             Conv2d(layer_1_features,layer_2_features,3),
@@ -98,7 +84,7 @@ class Network(Module):
         in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
 
         in_features = int(np.prod(in_shape))*layer_3_features
-        layer_4_features = trial.suggest_categorical("n_layer_4_features", [10,30,50,70,90,110])
+        layer_4_features = trial.suggest_int("n_layer_4_features", 80, 200 )
 
         # Layer 4
         lin_layers.extend([
@@ -140,6 +126,7 @@ class HyperModel(IModel):
         transforms.Grayscale(),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(90),
+        transforms.GaussianBlur(3),
         transforms.ToTensor(),
         #transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
@@ -160,8 +147,8 @@ class HyperModel(IModel):
 
         optimizer_name = trial.suggest_categorical(
             'optimizer', ['Adam', 'RMSprop', 'SGD'])
-        self.lr = trial.suggest_float('lr', 1e-5, 1e-1, log=True)
+        self.lr = trial.suggest_float('lr', 1e-5, 1e-2, log=True)
         self.optimizer = getattr(torch.optim, optimizer_name)(
-            network.layers.parameters(), lr=self.lr)
+            self.network.layers.parameters(), lr=self.lr)
 
 # END MODEL DEFINITION
