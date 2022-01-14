@@ -100,12 +100,14 @@ def train_one_epoch(
 
         running_correct += (torch.round(torch.sigmoid(outputs))
                             == labels).sum().detach().item()
-        print(f"  Step: [{i+1}/{n_steps}]")
+        if config.DEBUG: print(f"  Step: [{i+1}/{n_steps}]")
 
         if (i+1) % writer_precision == 0:
             last_loss = running_loss / writer_precision  # loss per batch
             last_correct = running_correct / (writer_precision * len(labels))
-            print(f'  Step: [{i+1}/{n_steps}], Loss: {last_loss:.5f}')
+            
+            if config.DEBUG: print(f'  Step: [{i+1}/{n_steps}], Loss: {last_loss:.5f}')
+            
             tb_x = epoch_index * n_steps + i + 1
             tb_writer.add_scalar('Training loss', last_loss, tb_x)
             tb_writer.add_scalar('Training accuracy', last_correct, tb_x)

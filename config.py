@@ -4,7 +4,7 @@ import datetime
 
 # define path to the original dataset and base path to the dataset
 SOURCE_PATH = "/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage/Images"
-DATA_PATH = os.path.join("/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage/", "Data","clean")
+DATA_PATH = os.path.join("/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage/", "Data")
 MODELS_PATH = "./models"
 TRAINED_MODELS_PATH = "./trained_models"
 MODEL_DEF = "./Model.py"
@@ -25,3 +25,5 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # define study config
 STUDIES_PATH = "./studies"
+
+DEBUG = False
