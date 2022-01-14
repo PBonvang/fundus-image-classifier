@@ -107,11 +107,10 @@ def objective(trial: Trial):
 
     avg_loss = sum(val_loss)/len(val_loss)
     accuracy = correct / min(len(test_dl.dataset), BATCH_SIZE*N_VALID_EXAMPLES)
-    
-    tb_writer.add_scalar("Avg. loss", avg_loss)
-    tb_writer.add_scalar("Accuracy", accuracy)
     trial.set_user_attr("Accuracy", accuracy)
 
+    if config.DEBUG: print(f"Accuracy: {accuracy*100}")
+    
     print(f"Trial execution time: {time.perf_counter() - trial_start:.2}s")
     return avg_loss
 
