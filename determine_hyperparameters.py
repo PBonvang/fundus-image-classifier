@@ -7,6 +7,7 @@ from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 import utils.dataloading as dataloading
 import torch
+import os
 
 import optuna
 from optuna import Trial
@@ -18,18 +19,21 @@ from sklearn.model_selection import KFold
 import config
 from utils.evaluation import conv_v
 
+if not os.path.exists(config.STUDIES_PATH):
+    os.makedirs(config.STUDIES_PATH)
+
 # Configuration
-KFOLDS = 2
-EPOCHS = 100
+KFOLDS = 5
+EPOCHS = 1
 BATCH_SIZE = 64
-N_TRAIN_EXAMPLES = 10000
-N_VALID_EXAMPLES = 2000
-N_TRIALS = 10
+N_TRAIN_EXAMPLES = 1
+N_VALID_EXAMPLES = 1
+N_TRIALS = 1
 DEBUG = False
 
 optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
-study_name = "thomas-study-100epochs-2fold"
-storage_name = f"sqlite:///{study_name}.db"
+study_name = "test_study"
+storage_name = f"sqlite:///{config.STUDIES_PATH}/{study_name}.db"
 
 trial_n = 0
 def objective(trial: Trial):
