@@ -27,7 +27,7 @@ def print_trial(trial: optuna.Trial):
         print(f"    {key}: {value}")
 
 if __name__ == "__main__":
-    study_name = "50epochs-64bs"
+    study_name = "more-optimizers_lower-lr"
     storage_name = f"sqlite:///{config.STUDIES_PATH}/{study_name}.db"
     study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True)
 
@@ -36,8 +36,10 @@ if __name__ == "__main__":
 
     print_top_5_trials(study)
 
-    param_importance_fig = plot_param_importances(study)
-    param_importance_fig.show()
+    show_plot = input("Do you wish to view plots? [Y/N]: ")
+    if show_plot.upper() == "Y":
+        param_importance_fig = plot_param_importances(study)
+        param_importance_fig.show()
 
-    para_cord_fig = plot_parallel_coordinate(study)
-    para_cord_fig.show()
+        para_cord_fig = plot_parallel_coordinate(study)
+        para_cord_fig.show()
