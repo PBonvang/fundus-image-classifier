@@ -19,6 +19,7 @@ from HyperModel import HyperModel
 import config
 from utils.training import train_one_epoch
 from utils.evaluation import get_sum_of_correct_predictions
+from display_study import print_top_5_trials
 
 if not os.path.exists(config.STUDIES_PATH):
     os.makedirs(config.STUDIES_PATH)
@@ -28,6 +29,7 @@ EPOCHS = 50
 BATCH_SIZE = 64
 N_VALID_EXAMPLES = 1000
 N_TRIALS = 100
+TIME_OUT = 8*60*60
 
 optuna.logging.get_logger("optuna").addHandler(
     logging.StreamHandler(sys.stdout))
@@ -92,8 +94,8 @@ def objective(trial: Trial):
             # Limiting validation data.
             if batch_idx == N_VALID_EXAMPLES:
                 break
-            data = data.to(config.DEVICE)
-            target = target.to(config.DEVICE).float()
+            data, target = data.to(config.DEVICE), target.to(
+                config.DEVICE).float()
             output = network(data)
 
             loss = model.loss_func(output, target)
@@ -105,7 +107,8 @@ def objective(trial: Trial):
     accuracy = correct / min(len(test_dl.dataset), BATCH_SIZE*N_VALID_EXAMPLES)
     trial.set_user_attr("Accuracy", accuracy)
 
-    if config.DEBUG: print(f"Accuracy: {accuracy*100}")
+    if config.DEBUG:
+        print(f"Accuracy: {accuracy*100}")
 
     print(f"Trial execution time: {(time.perf_counter() - trial_start)/60:.2f} min")
     return avg_loss
@@ -114,8 +117,8 @@ def objective(trial: Trial):
 if __name__ == "__main__":
     study = optuna.create_study(study_name=study_name, storage=storage_name,
                                 direction=StudyDirection.MINIMIZE, load_if_exists=True)
-
-    study.optimize(objective, n_trials=N_TRIALS, gc_after_trial=True)
+    
+    study.optimize(objective, n_trials=N_TRIALS, gc_after_trial=True, timeout=TIME_OUT)
 
     pruned_trials = study.get_trials(
         deepcopy=False, states=[TrialState.PRUNED])
@@ -128,13 +131,4 @@ if __name__ == "__main__":
     print("  Number of complete trials: ", len(complete_trials))
 
     print("Top trials:")
-    complete_trials.sort(key=lambda t: t.value)
-
-    top_five = complete_trials[:5]
-    for i, trial in enumerate(top_five):
-        print(f"\nTrial {i+1}:")
-        acc = float(trial.user_attrs["Accuracy"])*100
-        print("  Value: ", trial.value)
-        print(f"  Accuracy: {acc}")
-        for key, value in trial.params.items():
-            print(f"    {key}: {value}")
+    print_top_5_trials(study)
