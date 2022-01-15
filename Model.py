@@ -1,7 +1,6 @@
 import torch
 
 from imutils import paths
-from torch.nn.modules.activation import Sigmoid
 from torch.nn.modules.loss import BCELoss
 from torchvision.models import resnet50
 import torchvision.models as models
@@ -15,7 +14,7 @@ from torch.nn import BatchNorm2d
 from torch.nn import Conv2d
 from torch.nn import MaxPool2d
 from torch.nn import Linear
-from torch.nn import ReLU, Tanh, Sequential, Flatten
+from torch.nn import ReLU, Tanh, Sequential, Flatten, Sigmoid
 from torch.nn import Softmax
 from torch.nn import Module
 from torch.nn.init import kaiming_uniform_
@@ -107,9 +106,9 @@ class Model(IModel):
     # SET MODEL ATTRIBUTES HERE:
     loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
     optimizer_func = Adam
-    epochs = 50
+    epochs = 5
     batch_size = 32
-    lr = 0.001
+    lr = 0.0001
 
     training_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
@@ -117,6 +116,7 @@ class Model(IModel):
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(90),
         transforms.ToTensor(),
+        transforms.GaussianBlur(3)
         #transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
 

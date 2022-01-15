@@ -15,9 +15,7 @@ def evaluate_model(model: IModel, val_dl):
         # evaluate the model on the test set
         output = network(inputs)
         
-        
         n_correct_predictions += get_sum_of_correct_predictions(output, targets)
-    
     
     acc = n_correct_predictions/len(val_dl.dataset)
     return acc

@@ -1,13 +1,16 @@
 # NN-experimenter
-A set of scripts and utility functions setout to make it easy to setup, train and evaluate a Neural Network.
+A set of scripts and utility functions was made to make it easy to experiment with Neural Networks for the fundus dataset provided by StatuManu.
 
-## Walkthrough
-The idea is that you define your model in [Model.py](Model.py) following the instructions in the file. Then training, evaluating and saving metadata for the defined model, to give an overview over different models and their accuracy.
+## Use
+Modified: 14/01/2022  
 
-Steps:  
-1. Edit [config.py](config.py) to fit your setup
-2. Define your model in [Model.py](Model.py)
-3. Train your model by running the [trainer.py](trainer.py) script
+### Prerequisites
+1. Set environment config in [config.py](config.py)
+2. Build dataset by running [build_dataset.py](build_dataset.py)
+
+### Setting up model
+Open [Model.py](Model.py) and define your model by following the instructions
+    - Examples can be found under [models/examples](models/examples)
 
 ## Metadata
 The final step in the trainer script, saves the model, its blueprint and metadata.
@@ -16,9 +19,18 @@ The metadata includes attributes like learning rate, epochs, optimizer function.
 and can be found in [model_info.csv](model_info.csv).  
 This info file was designed to be used as a pandas dataframe or with excel to provide a searchable database.
 
-## Weights
-Sample: ```pos_weight=torch.tensor([3.492063492]).to(config.DEVICE)```
-Full: ```pos_weight=torch.tensor([0.366838129]).to(config.DEVICE)```
+### Training
+If the model has been set up correctly the model can be trained using [trainer.py](trainer.py)
+
+#### Training stats
+Training stats are saved as tensorboard runs located in the *runs* folder.  
+To view the stats, open tensorboard and find your run.
+
+## Dataset Weights
+Sample: 3.492063492
+
+
+Full: 0.366838129
 
 pos_weight = num_neg_samples / num_pos_samples
 

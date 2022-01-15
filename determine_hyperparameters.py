@@ -24,8 +24,8 @@ from display_study import print_top_5_trials
 # Configuration
 N_VALID_BATCHES = 1000
 N_TRIALS = 100 # number of wanted trials in study
-TIME_OUT = 1*60*60 # sec
-STUDY_NAME = "more-optimizers_lower-lr"
+TIME_OUT = 6*60*60 # sec
+STUDY_NAME = "32-bs_above-is-not-possible-to-allocate"
 
 def objective(trial: Trial):
     trial_start = time.perf_counter()
@@ -56,7 +56,8 @@ def objective(trial: Trial):
 
         train_dl = DataLoader(
             training_ds,
-            batch_size=model.batch_size
+            batch_size=model.batch_size,
+            shuffle=True
         )
         avg_loss = train_one_epoch(model, train_dl, epoch, tb_writer)
         trial.report(avg_loss, epoch)
