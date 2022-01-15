@@ -2,12 +2,12 @@ from datetime import datetime
 import logging
 import sys
 import time
+import shutil
+import os
 
-import numpy as np
 from torch.utils.data.dataloader import DataLoader
 import utils.dataloading as dataloading
 import torch
-import os
 from torch.utils.tensorboard import SummaryWriter
 
 import optuna
@@ -21,21 +21,11 @@ from utils.training import train_one_epoch
 from utils.evaluation import get_sum_of_correct_predictions
 from display_study import print_top_5_trials
 
-if not os.path.exists(config.STUDIES_PATH):
-    os.makedirs(config.STUDIES_PATH)
-
 # Configuration
-EPOCHS = 50
-BATCH_SIZE = 64
-N_VALID_EXAMPLES = 1000
-N_TRIALS = 100
-TIME_OUT = 8*60*60
-
-optuna.logging.get_logger("optuna").addHandler(
-    logging.StreamHandler(sys.stdout))
-study_name = "50epochs-64bs"
-storage_name = f"sqlite:///{config.STUDIES_PATH}/{study_name}.db"
-
+N_VALID_BATCHES = 1000
+N_TRIALS = 100 # number of wanted trials in study
+TIME_OUT = 1*60*60 # sec
+STUDY_NAME = "more-optimizers_lower-lr"
 
 def objective(trial: Trial):
     trial_start = time.perf_counter()
@@ -45,7 +35,7 @@ def objective(trial: Trial):
     network = model.network
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     tb_writer = SummaryWriter(
-        f'runs/studies/{study_name}/Trial{trial.number}_{timestamp}')
+        f'{config.STUDIES_PATH}/{trial.study.study_name}/Trial{trial.number}_{timestamp}')
 
     if config.DEBUG:
         print(f"""
@@ -59,18 +49,19 @@ def objective(trial: Trial):
     training_ds = dataloading.get_dataset(
         config.TRAIN_INFO, config.TRAIN, transforms=model.training_transforms)
 
-    for epoch in range(EPOCHS):
+    for epoch in range(model.epochs):
         if config.DEBUG:
-            print(f"    Epoch [{epoch+1}/{EPOCHS}]")
+            print(f"    Epoch [{epoch+1}/{model.epochs}]")
         network.train()
 
         train_dl = DataLoader(
             training_ds,
-            batch_size=BATCH_SIZE
+            batch_size=model.batch_size
         )
         avg_loss = train_one_epoch(model, train_dl, epoch, tb_writer)
         trial.report(avg_loss, epoch)
-        tb_writer.add_scalar('Loss epoch/train', avg_loss, epoch)
+        tb_writer.add_scalar('Epoch/Training loss', avg_loss, epoch)
+        tb_writer.close()
 
         # Handle pruning based on the intermediate value.
         if trial.should_prune():
@@ -84,7 +75,7 @@ def objective(trial: Trial):
 
     test_dl = DataLoader(
         test_ds,
-        batch_size=BATCH_SIZE,
+        batch_size=model.batch_size,
         shuffle=True
     )
     val_loss = []
@@ -92,7 +83,7 @@ def objective(trial: Trial):
     with torch.no_grad():
         for batch_idx, (data, target) in enumerate(test_dl):
             # Limiting validation data.
-            if batch_idx == N_VALID_EXAMPLES:
+            if batch_idx == N_VALID_BATCHES:
                 break
             data, target = data.to(config.DEVICE), target.to(
                 config.DEVICE).float()
@@ -104,7 +95,7 @@ def objective(trial: Trial):
             correct += get_sum_of_correct_predictions(output, target)
 
     avg_loss = sum(val_loss)/len(val_loss)
-    accuracy = correct / min(len(test_dl.dataset), BATCH_SIZE*N_VALID_EXAMPLES)
+    accuracy = correct / min(len(test_dl.dataset), model.batch_size*N_VALID_BATCHES)
     trial.set_user_attr("Accuracy", accuracy)
 
     if config.DEBUG:
@@ -115,7 +106,18 @@ def objective(trial: Trial):
 
 
 if __name__ == "__main__":
-    study = optuna.create_study(study_name=study_name, storage=storage_name,
+    if not os.path.exists(config.STUDIES_PATH):
+        os.makedirs(config.STUDIES_PATH)
+
+    optuna.logging.get_logger("optuna").addHandler(
+        logging.StreamHandler(sys.stdout))
+    storage_name = f"sqlite:///{config.STUDIES_PATH}/{STUDY_NAME}.db"
+
+    blueprint_dest = os.path.join(config.HYPER_MODELS_PATH, f"{STUDY_NAME}.py")
+    if not os.path.exists(blueprint_dest):
+        shutil.copy(config.HYPER_MODEL_DEF, blueprint_dest)
+
+    study = optuna.create_study(study_name=STUDY_NAME, storage=storage_name,
                                 direction=StudyDirection.MINIMIZE, load_if_exists=True)
     
     study.optimize(objective, n_trials=N_TRIALS, gc_after_trial=True, timeout=TIME_OUT)

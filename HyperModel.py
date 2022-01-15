@@ -33,7 +33,7 @@ class Network(Module):
         conv_layers = []
 
         in_shape = config.IMAGE_SHAPE
-        layer_1_features = trial.suggest_categorical("n_layer_1_features", [4,8,16,32,64])
+        layer_1_features = trial.suggest_categorical("n_layer_1_features", [8,16,32,64])
         # Layer 1
         conv_layers.extend([
             Conv2d(1,layer_1_features,3),
@@ -109,6 +109,8 @@ class Network(Module):
 # DEFINE MODEL HERE
 class HyperModel(IModel):
     # SET MODEL ATTRIBUTES HERE:
+    batch_size = 64
+    epochs = 50
     loss_func = BCEWithLogitsLoss(
         pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
 
@@ -119,14 +121,12 @@ class HyperModel(IModel):
         transforms.RandomRotation(90),
         transforms.GaussianBlur(3),
         transforms.ToTensor(),
-        #transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
 
     validation_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
         transforms.Grayscale(),
         transforms.ToTensor(),
-        #transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
     # END MODEL ATTRIBUTES
 
@@ -136,9 +136,10 @@ class HyperModel(IModel):
 
         self.network = network
 
+        self.lr = trial.suggest_float('lr', 1e-7, 1e-5, log=True)
+
         optimizer_name = trial.suggest_categorical(
-            'optimizer', ['Adam', 'RMSprop', 'SGD'])
-        self.lr = trial.suggest_float('lr', 1e-6, 1e-3, log=True)
+            'optimizer', ['Adam', 'RMSprop', 'SGD','Adagrad','AdamW','AdamMax'])
         self.optimizer = getattr(torch.optim, optimizer_name)(
             self.network.layers.parameters(), lr=self.lr)
 

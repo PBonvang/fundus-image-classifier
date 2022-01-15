@@ -109,8 +109,8 @@ def train_one_epoch(
             if config.DEBUG: print(f'  Step: [{i+1}/{n_steps}], Loss: {last_loss:.5f}')
             
             tb_x = epoch_index * n_steps + i + 1
-            tb_writer.add_scalar('Training loss', last_loss, tb_x)
-            tb_writer.add_scalar('Training accuracy', last_correct, tb_x)
+            tb_writer.add_scalar('Performance/Training loss', last_loss, tb_x)
+            tb_writer.add_scalar('Performance/Training accuracy', last_correct, tb_x)
             tb_writer.close()
             running_loss = 0.
             running_correct = 0
