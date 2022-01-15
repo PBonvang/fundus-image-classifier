@@ -1,7 +1,7 @@
 import optuna
 from optuna.study import StudyDirection
 from optuna.trial import TrialState
-from optuna.visualization import plot_param_importances
+from optuna.visualization import plot_param_importances, plot_parallel_coordinate
 
 import config
 
@@ -21,19 +21,23 @@ def print_trial(trial: optuna.Trial):
     acc = float(trial.user_attrs["Accuracy"])*100
     
     print("  Value: ", trial.value)
-    print(f"  Accuracy: {acc:.5f} %")
+    print(f"  Accuracy: {acc:.1f} %")
     print("  Parameters:")
     for key, value in trial.params.items():
         print(f"    {key}: {value}")
 
-study_name = "50epochs-64bs"
-storage_name = f"sqlite:///{config.STUDIES_PATH}/{study_name}.db"
-study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True)
+if __name__ == "__main__":
+    study_name = "50epochs-64bs"
+    storage_name = f"sqlite:///{config.STUDIES_PATH}/{study_name}.db"
+    study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True)
 
-df = study.trials_dataframe(attrs=("value", "params", "state")).sort_values(by="value")
-print(df.to_string())
+    df = study.trials_dataframe(attrs=("value", "params", "state")).sort_values(by="value")
+    print(df.to_string())
 
-print_top_5_trials(study)
+    print_top_5_trials(study)
 
-param_importance_fig = plot_param_importances(study)
-param_importance_fig.show()
+    param_importance_fig = plot_param_importances(study)
+    param_importance_fig.show()
+
+    para_cord_fig = plot_parallel_coordinate(study)
+    para_cord_fig.show()
