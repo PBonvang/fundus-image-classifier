@@ -27,9 +27,9 @@ def print_trial(trial: optuna.Trial):
         print(f"    {key}: {value}")
 
 if __name__ == "__main__":
-    study_name = "more-optimizers_lower-lr"
+    study_name = "32-bs_above-is-not-possible-to-allocate"
     storage_name = f"sqlite:///{config.STUDIES_PATH}/{study_name}.db"
-    study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True)
+    study = optuna.load_study(study_name=study_name, storage=storage_name)
 
     df = study.trials_dataframe(attrs=("value", "params", "state")).sort_values(by="value")
     print(df.to_string())
