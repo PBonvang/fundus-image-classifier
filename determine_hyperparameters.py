@@ -23,9 +23,9 @@ from display_study import print_top_5_trials
 
 # Configuration
 N_VALID_BATCHES = 1000
-N_TRIALS = 100 # number of wanted trials in study
-TIME_OUT = 6*60*60 # sec
-STUDY_NAME = "32-bs_above-is-not-possible-to-allocate"
+N_TRIALS = 1 # number of wanted trials in study
+TIME_OUT = 12*60*60 # sec
+STUDY_NAME = "test_study"
 
 def objective(trial: Trial):
     trial_start = time.perf_counter()
@@ -35,7 +35,7 @@ def objective(trial: Trial):
     network = model.network
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     tb_writer = SummaryWriter(
-        f'{config.STUDIES_PATH}/{trial.study.study_name}/Trial{trial.number}_{timestamp}')
+        os.path.join(config.STUDIES_PATH, trial.study.study_name,"tensorBoard",f"Trial{trial.number}_{timestamp}"))
 
     if config.DEBUG:
         print(f"""
@@ -99,6 +99,9 @@ def objective(trial: Trial):
     accuracy = correct / min(len(test_dl.dataset), model.batch_size*N_VALID_BATCHES)
     trial.set_user_attr("Accuracy", accuracy)
 
+    model_save_path = os.path.join(config.STUDIES_PATH, trial.study.study_name, "models",f"Trial{trial.number}_{timestamp}.pth")
+    torch.save(network.state_dict(), model_save_path)
+
     if config.DEBUG:
         print(f"Accuracy: {accuracy*100}")
 
@@ -107,19 +110,21 @@ def objective(trial: Trial):
 
 
 if __name__ == "__main__":
-    if not os.path.exists(config.STUDIES_PATH):
-        os.makedirs(config.STUDIES_PATH)
+    study_path = os.path.join(config.STUDIES_PATH, STUDY_NAME)
+    if not os.path.exists(study_path):
+        os.makedirs(study_path)
+        os.makedirs(os.path.join(study_path, "models"))
 
     optuna.logging.get_logger("optuna").addHandler(
         logging.StreamHandler(sys.stdout))
-    storage_name = f"sqlite:///{config.STUDIES_PATH}/{STUDY_NAME}.db"
+    storage_name = f"sqlite:///{config.STUDIES_PATH}/{STUDY_NAME}/{STUDY_NAME}.db"
+
+    study = optuna.create_study(study_name=STUDY_NAME, storage=storage_name,
+                                direction=StudyDirection.MINIMIZE, load_if_exists=True)
 
     blueprint_dest = os.path.join(config.HYPER_MODELS_PATH, f"{STUDY_NAME}.py")
     if not os.path.exists(blueprint_dest):
         shutil.copy(config.HYPER_MODEL_DEF, blueprint_dest)
-
-    study = optuna.create_study(study_name=STUDY_NAME, storage=storage_name,
-                                direction=StudyDirection.MINIMIZE, load_if_exists=True)
     
     study.optimize(objective, n_trials=N_TRIALS, gc_after_trial=True, timeout=TIME_OUT)
 
