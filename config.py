@@ -1,18 +1,17 @@
 import torch
 import os
-import datetime
 
 # define path to the original dataset and base path to the dataset
 SOURCE_PATH = "/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage/Images"
 DATA_PATH = os.path.join("/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage/", "Data")
 
-MODELS_PATH = "./models"
-TRAINED_MODELS_PATH = "./trained_models"
-MODEL_DEF = "./Model.py"
-MODELS_INFO_FILE_PATH = os.path.join(MODELS_PATH, "model_info.csv")
+MODELS_PATH = "final_models"
+TRAINED_MODELS_PATH = "trained_models"
+MODEL_DEF = "Model.py"
+MODELS_INFO_FILE = os.path.join(MODELS_PATH, "model_info.csv")
 
-HYPER_MODEL_DEF = "./HyperModel.py"
-HYPER_MODELS_PATH = "./hyper_models"
+HYPER_MODEL_DEF = "HyperModel.py"
+HYPER_MODELS_PATH = "hyper_models"
 
 # define paths to separate train and test
 TRAIN = os.path.join(DATA_PATH, "training_data")
@@ -30,4 +29,4 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 # define study config
 STUDIES_PATH = "./studies"
 
-DEBUG = False
+DEBUG = True
