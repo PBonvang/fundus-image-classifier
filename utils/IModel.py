@@ -1,6 +1,8 @@
 from torch.nn import Module
+import uuid
 
 class IModel:
+    id = str(uuid.uuid4())
     loss_func = None
     optimizer_func = None
     epochs = None

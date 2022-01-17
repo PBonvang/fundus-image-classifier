@@ -1,7 +1,4 @@
-import uuid
-import os
 import datetime
-import config
 
 from utils.IModel import IModel
 
@@ -17,17 +14,17 @@ class ModelMetadata:
         "Timestamp"
     ]
 
-    def __init__(self, model: IModel, accuracy):
-        self.id = str(uuid.uuid4())
-        self.model_path = os.path.join(config.TRAINED_MODELS_PATH, f"{self.id}.pth")
-        self.class_path = os.path.join(config.MODELS_PATH, f"{self.id}.py")
-        self.accuracy = accuracy
+    def __init__(self, model: IModel):
+        self.id = model.id
         self.epochs = model.epochs
         self.batch_size = model.batch_size
         self.learning_rate = model.lr
         self.loss_func = type(model.loss_func).__name__
         self.optimizer_func = model.optimizer_func.__name__
         self.timestamp = datetime.datetime.now()
+
+    def set_accuracy(self, accuracy: float):
+        self.accuracy = accuracy
     
     def __str__(self) -> str:
         parameters = map(str,[

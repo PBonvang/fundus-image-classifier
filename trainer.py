@@ -17,14 +17,35 @@ from utils.validation import model_is_valid
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 tb_writer = SummaryWriter(f'runs/isFundus{timestamp}')
 
-# Defining network
+##################################################################
+#                    Model initialization
+##################################################################
+print("[INFO] Initializing model")
 model = get_model()
 
 if not model_is_valid(model):
     raise TypeError(
         f"Model is missing attributes. Please define missing attributes and try again. Required attributes are defined in the {IModel.__name__} interface.")
 
-print("[INFO] Loading dataset")
+model_metadata = ModelMetadata(model)
+
+trained_model_path = os.path.join(config.TRAINED_MODELS_PATH, model.id)
+os.makedirs(trained_model_path)
+os.makedirs(os.path.join(trained_model_path, "checkpoints"))
+print("[INFO] Model initialized")
+
+##################################################################
+#                    Blueprint saving
+##################################################################
+print("\n[INFO] Saving model blueprint")
+shutil.copy(config.MODEL_DEF, 
+    os.path.join(config.MODELS_PATH, f"{model.id}.py"))
+print("[INFO] Model blueprint saved")
+
+##################################################################
+#                    Load datasets
+##################################################################
+print("\n[INFO] Loading dataset")
 training_ds = get_dataset(config.TRAIN_INFO, config.TRAIN, model.training_transforms)
 test_ds = get_dataset(config.TEST_INFO, config.TEST, model.validation_transforms)
 
@@ -33,32 +54,39 @@ test_dl = DataLoader(
     batch_size=model.batch_size,
     shuffle=True
     )
-print("[INFO] Dataset loaded succesfully\n")
+print("[INFO] Dataset loaded succesfully")
 
-print("[INFO] Training model")
+##################################################################
+#                    Model training
+##################################################################
+print("\n[INFO] Training model")
 train_model(model, training_ds, test_dl, tb_writer)
-print("[INFO] Training finished\n")
+print("[INFO] Training finished")
 
-print("[INFO] Evaluating model")
+##################################################################
+#                    Model evaluation
+##################################################################
+print("\n[INFO] Evaluating model")
 acc = evaluate_model(model, test_dl)*100
 print(f'Accuracy: {acc:.5f} %')
-print("[INFO] Evaluation finished\n")
+print("[INFO] Evaluation finished")
 
-print("[INFO] Saving model")
-metadata = ModelMetadata(model, acc)
-torch.save(model.network.state_dict(), metadata.model_path)
-
-# Copy model blueprint
-shutil.copy(config.MODEL_DEF, metadata.class_path)
+##################################################################
+#               Save model metadata
+##################################################################
+print("\n[INFO] Saving trained model metadata")
+model_metadata.set_accuracy(acc)
+torch.save(model.network.state_dict(), 
+    os.path.join(trained_model_path, f"{model.id}.pth"))
 
 # Add metadata to model info file
 if not os.path.exists(config.MODELS_INFO_FILE_PATH):
     with open(config.MODELS_INFO_FILE_PATH, "w") as info_file:
         header = ",".join(ModelMetadata.serialization_attributes)
         info_file.write(f"{header}\n")
-        info_file.write(str(metadata))
+        info_file.write(str(model_metadata))
 else:
     with open(config.MODELS_INFO_FILE_PATH, "a") as info_file:
-        info_file.write(f"\n{metadata}")
+        info_file.write(f"\n{model_metadata}")
 
 print("[INFO] Saved successfully")
