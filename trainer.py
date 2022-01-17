@@ -27,6 +27,7 @@ if not model_is_valid(model):
     raise TypeError(
         f"Model is missing attributes. Please define missing attributes and try again. Required attributes are defined in the {IModel.__name__} interface.")
 
+print("Model id: ",model.id)
 model_metadata = ModelMetadata(model)
 
 trained_model_path = os.path.join(config.TRAINED_MODELS_PATH, model.id)

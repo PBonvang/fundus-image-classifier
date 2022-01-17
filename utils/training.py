@@ -1,3 +1,5 @@
+from datetime import datetime
+import os
 import config
 import torch
 import time
@@ -21,6 +23,7 @@ def train_model(
     tb_writer.add_image('Example fundus pictures',
                         torchvision.utils.make_grid(example_images))
     tb_writer.add_graph(model.network.to('cpu'), example_images)
+
     for epoch in range(model.epochs):
         e_start = time.perf_counter()
         print(f'Epoch: [{epoch+1}/{model.epochs}]')
@@ -59,6 +62,11 @@ def train_model(
         if avg_vloss < best_vloss:
             best_vloss = avg_vloss
             best_net = model.network.state_dict()
+
+        # Save model checkpoint
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        torch.save(model.network.state_dict(),
+            os.path.join(config.TRAINED_MODELS_PATH, model.id, "checkpoints", f"E{epoch}_{timestamp}.pth"))
 
     model.network.load_state_dict(best_net)
 
