@@ -6,6 +6,7 @@ import shutil
 import os
 
 from torch.utils.data.dataloader import DataLoader
+from utils.RunInfo import RunInfo
 import utils.dataloading as dataloading
 import torch
 from torch.utils.tensorboard import SummaryWriter
@@ -24,7 +25,7 @@ from display_study import print_top_5_trials
 # Configuration
 N_VALID_BATCHES = 1000
 N_TRIALS = 1 # number of wanted trials in study
-TIME_OUT = 12*60*60 # sec
+TIME_OUT = None # sec
 STUDY_NAME = "test_study"
 
 def objective(trial: Trial):
@@ -49,6 +50,12 @@ def objective(trial: Trial):
     training_ds = dataloading.get_dataset(
         config.TRAIN_INFO, config.TRAIN, transforms=model.training_transforms)
 
+    run_info = RunInfo(
+        model=model,
+        run_path="",
+        ds_size=len(training_ds)
+    )
+
     for epoch in range(model.epochs):
         if config.DEBUG:
             print(f"    Epoch [{epoch+1}/{model.epochs}]")
@@ -59,9 +66,10 @@ def objective(trial: Trial):
             batch_size=model.batch_size,
             shuffle=True
         )
-        avg_loss = train_one_epoch(model, train_dl, epoch, tb_writer)
+        avg_loss, avg_acc = train_one_epoch(model, train_dl, epoch, run_info, tb_writer)
         trial.report(avg_loss, epoch)
         tb_writer.add_scalar('Epoch/Training loss', avg_loss, epoch)
+        tb_writer.add_scalar('Epoch/Training accuracy', avg_acc, epoch)
         tb_writer.close()
 
         # Handle pruning based on the intermediate value.

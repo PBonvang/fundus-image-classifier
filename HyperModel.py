@@ -139,7 +139,8 @@ class HyperModel(IModel):
         self.lr = trial.suggest_float('lr', 1e-7, 1e-5, log=True)
         optimizer_name = trial.suggest_categorical(
             'optimizer', ['Adam', 'RMSprop', 'SGD','Adagrad','AdamW','Adamax'])
-        self.optimizer = getattr(torch.optim, optimizer_name)(
+        self.optimizer_func = getattr(torch.optim, optimizer_name)
+        self.optimizer = self.optimizer_func(
             self.network.layers.parameters(), lr=self.lr)
 
 # END MODEL DEFINITION
