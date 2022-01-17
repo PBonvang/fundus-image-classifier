@@ -29,7 +29,7 @@ import config
 from utils.model import conv_output_shape
 
 class Network(Module):
-    def __init__(self, n_channels):
+    def __init__(self):
         super(Network, self).__init__()
 
         self.blur = nn.Conv2d(in_channels=1, out_channels=1, kernel_size=3, padding=1, bias=False, stride=1)
@@ -106,7 +106,7 @@ class Model(IModel):
     # SET MODEL ATTRIBUTES HERE:
     loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
     optimizer_func = Adam
-    epochs = 500
+    epochs = 1
     batch_size = 32
     lr = 0.0000022
 
@@ -140,7 +140,7 @@ class Model(IModel):
 
 def get_model() -> IModel:
     # INSTANTIATE MODEL HERE:
-    network = Network(3)
+    network = Network()
 
     for param in network.parameters():
         param.requires_grad = True

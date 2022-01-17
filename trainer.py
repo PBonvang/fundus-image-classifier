@@ -60,19 +60,26 @@ print("[INFO] Dataset loaded succesfully")
 #                    Model training
 ##################################################################
 print("\n[INFO] Training model")
-train_model(model, training_ds, test_dl, tb_writer)
+try:
+    train_model(model, training_ds, test_dl, tb_writer)
+except KeyboardInterrupt:
+    print("Stopping training...")
 print("[INFO] Training finished")
 
 ##################################################################
 #                    Model evaluation
 ##################################################################
 print("\n[INFO] Evaluating model")
-acc = evaluate_model(model, test_dl)*100
-print(f'Accuracy: {acc:.5f} %')
+acc = 0.0
+try:
+    acc = evaluate_model(model, test_dl)*100
+    print(f'Accuracy: {acc:.5f} %')
+except KeyboardInterrupt:
+    print("Stopping evaluation...")
 print("[INFO] Evaluation finished")
 
 ##################################################################
-#               Save model metadata
+#               Save model + metadata
 ##################################################################
 print("\n[INFO] Saving trained model metadata")
 model_metadata.set_accuracy(acc)
