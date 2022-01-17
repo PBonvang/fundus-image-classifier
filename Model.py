@@ -39,7 +39,7 @@ class Network(Module):
         conv_layers = []
 
         in_shape = config.IMAGE_SHAPE
-        layer_1_features = 8
+        layer_1_features = 64
         # Layer 1
         conv_layers.extend([
             Conv2d(1,layer_1_features,3),
@@ -51,7 +51,7 @@ class Network(Module):
         in_shape = conv_output_shape(in_shape, 3)
         in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
 
-        layer_2_features = 16
+        layer_2_features = 128
         # Layer 2
         conv_layers.extend([
             Conv2d(layer_1_features,layer_2_features,3),
@@ -63,7 +63,7 @@ class Network(Module):
         in_shape = conv_output_shape(in_shape, 3)
         in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
 
-        layer_3_features = 32
+        layer_3_features = 256
         # Layer 3
         conv_layers.extend([
             Conv2d(layer_2_features,layer_3_features,3),
@@ -106,9 +106,9 @@ class Model(IModel):
     # SET MODEL ATTRIBUTES HERE:
     loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
     optimizer_func = Adam
-    epochs = 5
+    epochs = 500
     batch_size = 32
-    lr = 0.0001
+    lr = 0.0000022
 
     training_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
