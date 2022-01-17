@@ -109,7 +109,7 @@ class Network(Module):
 # DEFINE MODEL HERE
 class HyperModel(IModel):
     # SET MODEL ATTRIBUTES HERE:
-    batch_size = 64
+    batch_size = 32
     epochs = 50
     loss_func = BCEWithLogitsLoss(
         pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
@@ -137,9 +137,8 @@ class HyperModel(IModel):
         self.network = network
 
         self.lr = trial.suggest_float('lr', 1e-7, 1e-5, log=True)
-
         optimizer_name = trial.suggest_categorical(
-            'optimizer', ['Adam', 'RMSprop', 'SGD','Adagrad','AdamW','AdamMax'])
+            'optimizer', ['Adam', 'RMSprop', 'SGD','Adagrad','AdamW','Adamax'])
         self.optimizer = getattr(torch.optim, optimizer_name)(
             self.network.layers.parameters(), lr=self.lr)
 
