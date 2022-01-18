@@ -111,7 +111,7 @@ def objective(trial: Trial):
     torch.save(network.state_dict(), model_save_path)
 
     if config.DEBUG:
-        print(f"Accuracy: {accuracy*100}")
+        print(f"Accuracy: {accuracy*100:.5f}%")
 
     print(f"Trial execution time: {(time.perf_counter() - trial_start)/60:.2f} min")
     return avg_loss

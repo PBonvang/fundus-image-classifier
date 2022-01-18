@@ -7,11 +7,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from utils.IModel import IModel
-from utils.FundusDataset import FundusDataset
 import config
 
 
-def evaluate_model(model: IModel, val_dl: FundusDataset, save_path: str):
+def evaluate_model(model: IModel, val_dl, save_path: str):
     network = model.network
     network.eval()
 
@@ -44,6 +43,7 @@ def convert_to_class_labels(output: torch.Tensor) -> torch.Tensor:
 # Creds: https://www.stackvidhya.com/plot-confusion-matrix-in-python-and-why/
 def plot_confusion_matrix(predictions, actuals, save_path) -> None:
     conf_matrix = confusion_matrix(actuals, predictions)
+    plt.figure()
     
     group_names = ['True Neg','False Pos','False Neg','True Pos']
     group_counts = ["{0:0.0f}".format(value) for value in
