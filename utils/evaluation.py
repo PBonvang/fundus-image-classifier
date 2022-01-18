@@ -13,10 +13,13 @@ import config
 def evaluate_model(model: IModel, val_dl, save_path: str):
     network = model.network
     network.eval()
+    n_batches = len(val_dl)
 
     n_correct_predictions = 0
     predictions, actuals = list(), list()
-    for (inputs, targets) in val_dl:
+    for batch_idx, (inputs, targets) in enumerate(val_dl):
+        if config.DEBUG:
+            print(f"Evaluation: Batch [{batch_idx+1}/{n_batches}")
         inputs = inputs.to(config.DEVICE).float()
         targets: torch.Tensor = targets.to(config.DEVICE).float()
         # evaluate the model on the test set
