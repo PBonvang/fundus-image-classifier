@@ -25,8 +25,8 @@ def evaluate_model(model: IModel, val_dl, save_path: str):
         n_correct_predictions += get_sum_of_correct_predictions(output, targets)
 
         pred = convert_to_class_labels(output)
-        predictions.extend(pred.detach().numpy())
-        actuals.extend(targets.detach().numpy())
+        predictions.extend(pred.cpu().detach().numpy())
+        actuals.extend(targets.cpu().detach().numpy())
     
     predictions, actuals = np.vstack(predictions), np.vstack(actuals)
     plot_confusion_matrix(predictions, actuals, save_path)

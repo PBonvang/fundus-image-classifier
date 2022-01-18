@@ -13,7 +13,7 @@ from utils.evaluation import evaluate_model
 from utils.training import train_one_epoch
 
 
-EPOCHS = 1
+EPOCHS = 50
 
 base_line_info_file = os.path.join("baselines","baselines.csv")
 baselines = [Densenet201, GNet, ResNet101, ResNet152]
@@ -28,7 +28,7 @@ for i, model in enumerate(models):
     print("------------------------------------")
 
     run_path = os.path.join("baselines", model_name)
-    network = model.network
+    network = model.network.to(config.DEVICE)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     tb_writer = SummaryWriter(
         os.path.join(run_path,"tensorboard", timestamp))
@@ -41,8 +41,7 @@ for i, model in enumerate(models):
     )
 
     for epoch in range(EPOCHS):
-        if config.DEBUG:
-            print(f"    Epoch [{epoch+1}/{EPOCHS}]")
+        print(f"    Epoch [{epoch+1}/{EPOCHS}]")
         network.train()
 
         train_dl = DataLoader(
