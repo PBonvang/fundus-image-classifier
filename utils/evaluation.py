@@ -1,4 +1,5 @@
 
+import os
 import torch
 import numpy as np
 from sklearn.metrics import confusion_matrix
@@ -10,7 +11,7 @@ from utils.FundusDataset import FundusDataset
 import config
 
 
-def evaluate_model(model: IModel, val_dl: FundusDataset):
+def evaluate_model(model: IModel, val_dl: FundusDataset, save_path: str):
     network = model.network
     network.eval()
 
@@ -29,7 +30,7 @@ def evaluate_model(model: IModel, val_dl: FundusDataset):
         actuals.extend(targets.detach().numpy())
     
     predictions, actuals = np.vstack(predictions), np.vstack(actuals)
-    plot_confusion_matrix(predictions, actuals)
+    plot_confusion_matrix(predictions, actuals, save_path)
     
     acc = n_correct_predictions/len(val_dl.dataset)
     return acc
@@ -41,7 +42,7 @@ def convert_to_class_labels(output: torch.Tensor) -> torch.Tensor:
     return torch.round(output)
 
 # Creds: https://www.stackvidhya.com/plot-confusion-matrix-in-python-and-why/
-def plot_confusion_matrix(predictions, actuals) -> None:
+def plot_confusion_matrix(predictions, actuals, save_path) -> None:
     conf_matrix = confusion_matrix(actuals, predictions)
     
     group_names = ['True Neg','False Pos','False Neg','True Pos']
@@ -66,5 +67,7 @@ def plot_confusion_matrix(predictions, actuals) -> None:
     ax.xaxis.set_ticklabels(['False','True'])
     ax.yaxis.set_ticklabels(['False','True'])
 
-    ## Display the visualization of the Confusion Matrix.
-    plt.show()
+    ## Save visualization of the Confusion Matrix.
+    plt.savefig(
+        os.path.join(save_path,"confusion-matrix.png")
+    )

@@ -1,3 +1,4 @@
+#%% imports
 import shutil
 import uuid
 import config
@@ -20,7 +21,7 @@ timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 tb_writer = SummaryWriter(f'runs/isFundus{timestamp}')
 
 ##################################################################
-#                    Model initialization
+#%%                    Model initialization
 ##################################################################
 print("[INFO] Initializing model")
 model = get_model()
@@ -62,7 +63,7 @@ print("Model id: ", model.id)
 print("[INFO] Model initialized")
 
 ##################################################################
-#                    Prepare run
+#%%                    Prepare run
 ##################################################################
 print("\n[INFO] Preparing run")
 trained_model_path = os.path.join(config.TRAINED_MODELS_PATH, model.id)
@@ -104,7 +105,7 @@ print("[INFO] Model blueprint saved")
 print("[INFO] Run prepared")
 
 ##################################################################
-#                    Model training
+#%%                    Train model
 ##################################################################
 print("\n[INFO] Training model")
 try:
@@ -118,20 +119,21 @@ except KeyboardInterrupt:
 print("[INFO] Training finished")
 
 ##################################################################
-#                    Model evaluation
+#%%                    Model evaluation
 ##################################################################
 print("\n[INFO] Evaluating model")
 acc = 0.0
 try:
-    acc = evaluate_model(model, test_dl)*100
-    run_info.set_test_accuracy(acc)
+    acc = evaluate_model(model, test_dl, run_path)*100
     print(f'Accuracy: {acc:.5f} %')
 except KeyboardInterrupt:
     print("Stopping evaluation...")
 print("[INFO] Evaluation finished")
 
+run_info.set_test_accuracy(acc)
+
 ##################################################################
-#               Save model + run info
+#%%               Save model + run info
 ##################################################################
 print("\n[INFO] Saving trained model and run info")
 torch.save(model.network.state_dict(),
