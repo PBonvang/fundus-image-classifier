@@ -16,10 +16,10 @@ evaluations_info_file = os.path.join(
 )
 
 baselines = [
-	{"model": Densenet201, "net": "baselines/Densenet201/20220118_123359.pth"},
-	{"model": GNet, "net": "baselines/GNet/20220118_123440.pth"},
-	{"model": ResNet101, "net": "baselines/ResNet101/20220118_123455.pth"},
-	{"model": ResNet152, "net": "baselines/ResNet152/20220118_123540.pth"}
+	{"model": Densenet201, "net": "baselines\\Densenet201\\20220118_111822.pth"},
+	{"model": GNet, "net": "baselines\\GNet\\20220118_140049.pth"},
+	{"model": ResNet101, "net": "baselines\\ResNet101\\20220118_161426.pth"},
+	{"model": ResNet152, "net": "baselines\\ResNet152\\20220118_184821.pth"}
 ]
 
 val_transforms = baselines[0].get("model").get_model().validation_transforms

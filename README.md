@@ -27,10 +27,7 @@ Training stats are saved as tensorboard runs located in the *runs* folder.
 To view the stats, open tensorboard and find your run.
 
 ## Dataset Weights
-Sample: 3.492063492
-
-
-Full: 0.366838129
+If the dataset is build with [build_dataset.py](build_dataset.py) you'll find a info.txt file in the base of it, which included the pos_weight for the dataset.  
 
 pos_weight = num_neg_samples / num_pos_samples
 
