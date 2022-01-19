@@ -17,9 +17,6 @@ from utils.evaluation import evaluate_model
 from utils.training import train_model
 from utils.validation import model_is_valid
 
-timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-tb_writer = SummaryWriter(f'runs/isFundus{timestamp}')
-
 ##################################################################
 #%%                    Model initialization
 ##################################################################
@@ -102,6 +99,10 @@ print("\n[INFO] Saving model blueprint")
 shutil.copy(config.MODEL_DEF,
             os.path.join(run_path, f"{model.id}.py"))
 print("[INFO] Model blueprint saved")
+
+tb_writer = SummaryWriter(
+    os.path.join(run_path, "tensorboard")
+)
 print("[INFO] Run prepared")
 
 ##################################################################
