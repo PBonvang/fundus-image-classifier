@@ -51,7 +51,7 @@ class Network(Module):
 # DEFINE MODEL HERE
 class Model(IModel):
     # SET MODEL ATTRIBUTES HERE:
-    loss_func = BCEWithLogitsLoss()
+    loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
     optimizer_func = Adam
     epochs = 50
     batch_size = 32
