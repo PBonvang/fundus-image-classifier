@@ -24,6 +24,10 @@ def train_model(
     tb_writer.add_image('Example fundus pictures',
                         torchvision.utils.make_grid(example_images))
     tb_writer.add_graph(model.network.to('cpu'), example_images)
+    model.network = model.network.to(config.DEVICE)
+
+    if config.SAVE_EPOCH_CHECKPOINTS or config.SAVE_STEP_CHECKPOINTS:
+        os.makedirs(run_info.checkpoint_path)
 
     for epoch in range(model.epochs):
         e_start = time.perf_counter()
@@ -71,9 +75,10 @@ def train_model(
             run_info.best_validation_accuracy = vacc
 
         # Save model checkpoint
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        torch.save(model.network.state_dict(),
-                   os.path.join(run_info.checkpoint_path, f"E{epoch}_{timestamp}.pth"))
+        if config.SAVE_EPOCH_CHECKPOINTS:
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            torch.save(model.network.state_dict(),
+                    os.path.join(run_info.checkpoint_path, f"E{epoch+1}_{timestamp}.pth"))
 
         run_info.epochs_run += 1
 
@@ -92,7 +97,6 @@ def train_one_epoch(
     running_correct = 0
     n_steps = len(train_dl)
     writer_precision = math.ceil(n_steps/10)
-    network = model.network.to(config.DEVICE)
 
     # Here, we use enumerate(training_loader) instead of
     # iter(training_loader) so that we can track the batch
@@ -106,7 +110,7 @@ def train_one_epoch(
         model.optimizer.zero_grad()
 
         # Make predictions for this batch
-        outputs = network(inputs)
+        outputs = model.network(inputs)
 
         # Compute the loss and its gradients
         loss = model.loss_func(outputs, labels)
@@ -124,7 +128,7 @@ def train_one_epoch(
 
         if (i+1) % writer_precision == 0:
             last_loss = running_loss / writer_precision  # loss per batch
-            last_acc = running_correct / (writer_precision * len(labels))
+            last_acc = running_correct / (writer_precision * model.batch_size)
 
             if config.DEBUG:
                 print(f'  Step: [{i+1}/{n_steps}], Loss: {last_loss:.5f}')
@@ -142,6 +146,11 @@ def train_one_epoch(
 
             running_loss = 0.
             running_correct = 0
+
+            if config.SAVE_STEP_CHECKPOINTS:
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                torch.save(model.network.state_dict(),
+                        os.path.join(run_info.checkpoint_path, f"E{epoch_index+1}_S{i+1}_{timestamp}.pth"))
 
         run_info.steps_taken += 1
         run_info.samples_seen += len(inputs)

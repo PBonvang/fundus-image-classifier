@@ -1,32 +1,46 @@
 import torch
 import os
 
-# define path to the original dataset and base path to the dataset
-SOURCE_PATH = "/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage/Images"
-DATA_PATH = os.path.join("/home/master/Documents/Study/IntroToIntelligentSystems/FinalProject/StatuManu/IsFundusImage/", "Data")
+#############################################
+# Debugging configuration
+#############################################
+DEBUG = False # Debugging switch, enabling and disabling debugging logs
 
-MODELS_PATH = "final_models"
-TRAINED_MODELS_PATH = "trained_models"
-MODEL_DEF = "Model.py"
-MODELS_INFO_FILE = os.path.join(MODELS_PATH, "model_info.csv")
+#############################################
+# Dataset configuration
+#############################################
+SOURCE_PATH = "Path/to/fundus_images" # Path to folder containing fundus images
+DATA_PATH = "Path/to/dataset" # Path to dataset used for training and validation
 
-HYPER_MODEL_DEF = "HyperModel.py"
-HYPER_MODELS_PATH = "hyper_models"
 
-# define paths to separate train and test
-TRAIN = os.path.join(DATA_PATH, "training_data")
-TRAIN_INFO = os.path.join(DATA_PATH, "train.csv")
-DS_WEIGHT = 0.29158215010141986
 
-TEST = os.path.join(DATA_PATH, "test_data")
-TEST_INFO = os.path.join(DATA_PATH, "test.csv")
+TRAIN = os.path.join(DATA_PATH, "training_data") # Path to training dataset
+TRAIN_INFO = os.path.join(DATA_PATH, "train.csv") # Path to training label file
+DS_WEIGHT = 0.29158215010141986 # Dataset positive weight, to counterbalance imbalanced datasets
 
-IMAGE_SHAPE = (256, 256)
+TEST = os.path.join(DATA_PATH, "test_data") # Path to test/validation dataset
+TEST_INFO = os.path.join(DATA_PATH, "test.csv") # Path to test/validation label file
 
-# determine the device to be used for training and evaluation
+IMAGE_SHAPE = (224, 179)
+
+#############################################
+# Model configuration
+#############################################
+TRAINED_MODELS_PATH = "models" # Path to store model training runs in
+MODEL_DEF = "Model.py" # Path to the python file containing the model blueprint 
+MODELS_INFO_FILE = os.path.join(TRAINED_MODELS_PATH, "models_info.csv") # CSV file to save model info to
+
+SAVE_EPOCH_CHECKPOINTS = False # Enabled a checkpoint will be saved after each epoch
+SAVE_STEP_CHECKPOINTS = False # Enabled a checkpoint will be saved every tenth of an epoch
+
+#############################################
+# Hypermodel configuration
+#############################################
+HYPER_MODEL_DEF = "HyperModel.py" # Path to the python file containing the hypermodel blueprint
+HYPER_MODELS_PATH = "hypermodels" # Path to store hypermodel blueprints
+STUDIES_PATH = "studies" # Path to save optuna studies to
+
+#############################################
+# CUDA configuration
+#############################################
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-# define study config
-STUDIES_PATH = "./studies"
-
-DEBUG = True
