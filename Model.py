@@ -1,5 +1,3 @@
-import torch
-
 import torchvision.models as models
 from torchvision import transforms
 import torch
@@ -10,45 +8,68 @@ from torch.nn import BCEWithLogitsLoss
 from utils.IModel import IModel
 import config
 
+
 class Network(Module):
     def __init__(self):
         super(Network, self).__init__()
 
-        self.blur = nn.Conv2d(in_channels=3, out_channels=3, kernel_size=3, padding=1, bias=False, stride=1)
-        self.blur.weight = nn.Parameter(torch.ones((3,3,3,3))/9.0)
+        # DEFINE NETWORK HERE
+
+        ###########################################
+        # Filters
+        ###########################################
+        self.blur = nn.Conv2d(in_channels=3, out_channels=3,
+                              kernel_size=3, padding=1, bias=False, stride=1)
+        self.blur.weight = nn.Parameter(torch.ones((3, 3, 3, 3))/9.0)
         self.blur.weight.requires_grad = False
 
+        ###########################################
+        # Network layers
+        ###########################################
         pretrained_model = models.densenet201(pretrained=True)
         self.features = nn.ModuleList(pretrained_model.children())[:-1]
         self.features = nn.Sequential(*self.features)
-        
-        in_features = pretrained_model.classifier.in_features*8*8
+
+        ###########################################
+        # Classifier
+        ###########################################
+        in_features = pretrained_model.classifier.in_features*7*5
         self.fc = nn.Sequential(
             nn.Linear(in_features, 1),
             nn.Sigmoid()
         )
 
-    # forward propagate input
+        # END NETWORK DEFINITION
+
     def forward(self, x):
+        # DEFINE NETWORK FORWARD PROPAGATION OF INPUT HERE
         x = self.blur(x)
         x = self.features(x)
-        x = torch.flatten(x,1)
+        x = torch.flatten(x, 1)
         x = self.fc(x)
+        # END FORWARD PROPAGATION
 
         x = torch.flatten(x)
         return x
 
-# END NETWORK DEFINITION
-
 # DEFINE MODEL HERE
+
+
 class Model(IModel):
     # SET MODEL ATTRIBUTES HERE:
-    loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
+    ###########################################
+    # Training attributes
+    ###########################################
+    loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor(
+        [config.DS_WEIGHT]).to(config.DEVICE))
     optimizer_func = torch.optim.RMSprop
-    epochs = 1
-    batch_size = 32
+    epochs = 500
+    batch_size = 16
     lr = 0.0000022
 
+    ###########################################
+    # Training preprocessing
+    ###########################################
     training_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
         transforms.RandomHorizontalFlip(),
@@ -57,10 +78,14 @@ class Model(IModel):
         transforms.GaussianBlur(3)
     ])
 
+    ###########################################
+    # Validation preprocessing
+    ###########################################
     validation_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
         transforms.ToTensor(),
     ])
+
     # END MODEL ATTRIBUTES
 
     def __init__(self, network):

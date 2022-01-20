@@ -33,7 +33,7 @@ def objective(trial: Trial):
     print(f"Trial: [{trial.number +1}/{N_TRIALS}]")
 
     model = HyperModel(trial)
-    network = model.network
+    network = model.network.to(config.DEVICE)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     tb_writer = SummaryWriter(
         os.path.join(config.STUDIES_PATH, trial.study.study_name,"tensorBoard",f"Trial{trial.number}_{timestamp}"))

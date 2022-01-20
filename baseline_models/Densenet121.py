@@ -1,18 +1,14 @@
 import torch
-
+from torch import nn
+from torch.optim import Adam
 import torchvision.models as models
 from torchvision import transforms
-from torch import nn
-
-from torch.nn import Module
-from torch.nn import BCEWithLogitsLoss
-from torch.optim import Adam
 
 from utils.IModel import IModel
 import config
 
 # DEFINE NETWORK HERE:
-class Network(Module):
+class Network(nn.Module):
     def __init__(self):
         super(Network, self).__init__()
 
@@ -39,7 +35,7 @@ class Network(Module):
 # DEFINE MODEL HERE
 class Model(IModel):
     # SET MODEL ATTRIBUTES HERE:
-    loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
+    loss_func = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
     optimizer_func = Adam
     epochs = 50
     batch_size = 32
