@@ -9,7 +9,7 @@ from torch.utils.data.dataloader import DataLoader
 from utils.dataloading import get_dataset
 from utils.evaluation import evaluate_model
 from utils.RunInfo import RunInfo
-from baseline_models import Densenet201, GNet, ResNet101, ResNet152
+from baseline_models import Densenet121, Densenet201, GNet, ResNet101, ResNet152
 
 evaluations_info_file = os.path.join(
 	"evaluations","evaluations.csv"
@@ -19,7 +19,8 @@ baselines = [
 	{"model": Densenet201, "net": "baselines\\Densenet201\\20220118_111822.pth"},
 	{"model": GNet, "net": "baselines\\GNet\\20220118_140049.pth"},
 	{"model": ResNet101, "net": "baselines\\ResNet101\\20220118_161426.pth"},
-	{"model": ResNet152, "net": "baselines\\ResNet152\\20220118_184821.pth"}
+	{"model": ResNet152, "net": "baselines\\ResNet152\\20220118_184821.pth"},
+	{"model": Densenet121, "net": "baselines\\Densenet121\\20220118_231059.pth"}
 ]
 
 val_transforms = baselines[0].get("model").get_model().validation_transforms
