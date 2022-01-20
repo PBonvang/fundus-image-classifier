@@ -19,7 +19,7 @@ def evaluate_model(model: IModel, val_dl, save_path: str):
     predictions, actuals = list(), list()
     for batch_idx, (inputs, targets) in enumerate(val_dl):
         if config.DEBUG:
-            print(f"Evaluation: Batch [{batch_idx+1}/{n_batches}")
+            print(f"    Batch [{batch_idx+1}/{n_batches}]")
         inputs = inputs.to(config.DEVICE).float()
         targets: torch.Tensor = targets.to(config.DEVICE).float()
         # evaluate the model on the test set
@@ -38,7 +38,7 @@ def evaluate_model(model: IModel, val_dl, save_path: str):
     return acc
 
 def get_sum_of_correct_predictions(outputs, labels):
-    return (torch.round(outputs) == labels).sum().detach().item()
+    return (convert_to_class_labels(outputs) == labels).sum().detach().item()
 
 def convert_to_class_labels(output: torch.Tensor) -> torch.Tensor:
     return torch.round(output)
