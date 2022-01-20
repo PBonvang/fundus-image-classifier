@@ -1,27 +1,16 @@
 import torch
 
-from imutils import paths
-from torch.nn.modules.loss import BCELoss
-from torchvision.models import resnet50
-import torchvision.models as models
 from torchvision import transforms
-from tqdm import tqdm
 from torch import nn
-import matplotlib.pyplot as plt
 import numpy as np
 
 from torch.nn import BatchNorm2d
 from torch.nn import Conv2d
 from torch.nn import MaxPool2d
 from torch.nn import Linear
-from torch.nn import ReLU, Tanh, Sequential, Flatten, Sigmoid
-from torch.nn import Softmax
+from torch.nn import ReLU, Sequential, Flatten, Sigmoid
 from torch.nn import Module
-from torch.nn.init import kaiming_uniform_
-from torch.nn.init import xavier_uniform_
-from torch.nn import CrossEntropyLoss
 from torch.nn import BCEWithLogitsLoss
-from torch.optim import SGD, adam
 from torch.optim import Adam
 
 from utils.IModel import IModel
@@ -117,14 +106,12 @@ class Model(IModel):
         transforms.RandomRotation(90),
         transforms.ToTensor(),
         transforms.GaussianBlur(3)
-        #transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
 
     validation_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
         transforms.Grayscale(),
         transforms.ToTensor(),
-        #transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
     # END MODEL ATTRIBUTES
 

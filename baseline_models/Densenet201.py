@@ -1,23 +1,11 @@
 import torch
 
-from imutils import paths
-from torch.nn.modules.activation import Sigmoid
-from torch.nn.modules.loss import BCELoss
 import torchvision.models as models
 from torchvision import transforms
 from torch import nn
-import numpy as np
 
-from torch.nn import Conv2d
-from torch.nn import MaxPool2d
-from torch.nn import Linear
-from torch.nn import ReLU
-from torch.nn import Softmax
 from torch.nn import Module
-from torch.nn.init import kaiming_uniform_
-from torch.nn.init import xavier_uniform_
 from torch.nn import BCEWithLogitsLoss
-from torch.optim import SGD
 from torch.optim import Adam
 
 from utils.IModel import IModel
@@ -59,7 +47,6 @@ class Model(IModel):
 
     training_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
-        # transforms.Grayscale(),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(90),
         transforms.ToTensor(),
@@ -67,7 +54,6 @@ class Model(IModel):
 
     validation_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
-        # transforms.Grayscale(),
         transforms.ToTensor(),
     ])
     # END MODEL ATTRIBUTES
@@ -85,13 +71,6 @@ class Model(IModel):
 def get_model() -> IModel:
     # INSTANTIATE MODEL HERE:
     network = Network()
-
-    for param in network.parameters():
-        param.requires_grad = False
-
-    for param in network.fc.parameters():
-        param.requires_grad = True
-
     model = Model(network)
     # END MODEL INSTANTIATION
 
