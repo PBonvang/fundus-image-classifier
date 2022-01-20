@@ -1,10 +1,13 @@
+"""
+This script builds a dataset in the format required by this system.
+"""
 #%% Imports
 import os
+from os.path import exists
 from imutils import paths
 import pandas as pd
 import shutil
 import sys
-import numpy as np
 from pandas.core.frame import DataFrame
 
 import config
@@ -16,7 +19,7 @@ def get_ds_size(max):
     return min(int(ds_size), max)
 
 def get_test_split():
-    split = input("Test split (def: 0.1): ") or 0.1
+    split = input("Test split (0.1): ") or 0.1
 
     return float(split)
 
@@ -28,7 +31,7 @@ def get_label_from_image_path(path):
 
 def copy_images(df, dest):
     # check if the destination folder exists and if not create it
-    if os.path.exists(dest):
+    if exists(dest):
         clean = input(f"{dest} already exists, would you like to erase existing images before copying new images? [Y|N]: ")
         
         if clean.upper() == 'Y':
@@ -37,7 +40,7 @@ def copy_images(df, dest):
             print("Exiting to avoid mixing dataset")
             sys.exit()
 
-    if not os.path.exists(dest):
+    if not exists(dest):
         os.makedirs(dest)
 
     for row in df.values:
@@ -47,13 +50,22 @@ def copy_images(df, dest):
         shutil.copy(origin, image_dest)
 
 #%% Configure output directories
-train_path = os.path.join(config.DATA_PATH, "training_data")
-test_path = os.path.join(config.DATA_PATH, "test_data")
+dest_path = input(f"Specify output directory ({config.DATA_PATH}): ") or config.DATA_PATH
+if not exists(dest_path):
+    create_dest = input(f"The directory {dest_path} doesn't exist, do you wish to create it? [Y/N]").upper()
 
-train_info = os.path.join(config.DATA_PATH, "train.csv")
-test_info = os.path.join(config.DATA_PATH, "test.csv")
+    if create_dest == "Y":
+        os.makedirs(dest_path)
+    else:
+        sys.exit()
 
-ds_info = os.path.join(config.DATA_PATH, "info.txt")
+train_path = os.path.join(dest_path, "training_data")
+test_path = os.path.join(dest_path, "test_data")
+
+train_info = os.path.join(dest_path, "train.csv")
+test_info = os.path.join(dest_path, "test.csv")
+
+ds_info = os.path.join(dest_path, "info.txt")
 
 #%% Determine source type
 source_type = input("Is the source files from sample(S) or origin(O) dataset? [S/O]: ").upper()
@@ -70,6 +82,11 @@ if source_type == "O":
         sys.exit()
 
 #%% Get get image data
+source_path = input(f"Specify path to image folder ({config.SOURCE_PATH}): ") or config.SOURCE_PATH
+if not exists(source_path):
+    print(f"Invalid source path specified: {source_path}")
+    sys.exit()
+
 df: DataFrame = None
 ds_size: int = 0
 
@@ -79,7 +96,7 @@ if source_type == "O":
     ds_size = get_ds_size(len(df))
     df = df.loc[:ds_size - 1]
 else:
-    image_paths = list(paths.list_images(config.SOURCE_PATH))
+    image_paths = list(paths.list_images(source_path))
     ds_size = get_ds_size(len(image_paths))
     image_paths = image_paths[:ds_size]
     df = pd.DataFrame(image_paths, columns=["path"])
@@ -102,8 +119,8 @@ test_df = df.loc[:test_len-1]
 train_df = df.loc[test_len:]
 
 #%% Copy images to respective folders
-copy_images(test_df, test_path)
-copy_images(train_df, train_path)
+copy_images(test_df, source_path, test_path)
+copy_images(train_df, source_path, train_path)
 
 #%% Create information files
 test_df.to_csv(test_info)
@@ -128,7 +145,7 @@ Dataset stats:
         pos_weight: {n_neg/n_pos}
 """
 
-print(info_text)
-
 with open(ds_info, "w") as f:
     f.write(info_text)
+
+print(info_text)
