@@ -5,7 +5,7 @@ from torch import nn
 from torch.nn import Module
 from torch.nn import BCEWithLogitsLoss
 
-from utils.IModel import IModel
+from utils import IModel
 import config
 
 
@@ -33,7 +33,7 @@ class Network(Module):
         ###########################################
         # Classifier
         ###########################################
-        in_features = pretrained_model.classifier.in_features*7*5
+        in_features = pretrained_model.classifier.in_features*8*8
         self.fc = nn.Sequential(
             nn.Linear(in_features, 1),
             nn.Sigmoid()

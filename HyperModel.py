@@ -6,10 +6,9 @@ import numpy as np
 
 from optuna import Trial
 
-from utils.IModel import IModel
+import utils
+from utils import IModel
 import config
-from utils.model import conv_output_shape
-
 
 class Network(nn.Module):
     def __init__(self, trial: Trial):
@@ -37,7 +36,7 @@ class Network(nn.Module):
             nn.MaxPool2d((2,2))
         ])
 
-        in_shape = conv_output_shape(in_shape, 3)
+        in_shape = utils.conv_output_shape(in_shape, 3)
         in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
 
         layer_2_features = trial.suggest_categorical("n_layer_2_features", [16,32,64,128,256])
@@ -50,7 +49,7 @@ class Network(nn.Module):
         ])
 
 
-        in_shape = conv_output_shape(in_shape, 3)
+        in_shape = utils.conv_output_shape(in_shape, 3)
         in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
 
 
@@ -66,7 +65,7 @@ class Network(nn.Module):
         self.conv_layers = nn.Sequential(*conv_layers)
         lin_layers = []
 
-        in_shape = conv_output_shape(in_shape, 3)
+        in_shape = utils.conv_output_shape(in_shape, 3)
         in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
 
         in_features = int(np.prod(in_shape))*layer_3_features

@@ -6,9 +6,8 @@ import os
 
 from torch.utils.data.dataloader import DataLoader
 
-from utils.dataloading import get_dataset
-from utils.evaluation import evaluate_model
-from utils.RunInfo import RunInfo
+import utils
+from utils import RunInfo
 from baseline_models import Densenet121, Densenet201, GNet, ResNet101, ResNet152
 
 evaluations_info_file = os.path.join(
@@ -26,7 +25,7 @@ baselines = [
 val_transforms = baselines[0].get("model").get_model().validation_transforms
 batch_size = 32
 
-validation_ds = get_dataset(
+validation_ds = utils.get_dataset(
     config.TEST_INFO, config.TEST, val_transforms)
 
 val_dl = DataLoader(
@@ -56,7 +55,7 @@ for baseline in baselines:
 		base_model_path=net_path
 	)
 
-	accuracy = evaluate_model(model, val_dl, save_path)*100
+	accuracy = utils.evaluate_model(model, val_dl, save_path)*100
 	run_info.set_test_accuracy(accuracy)
 	print(f'{model_name} accuracy: {accuracy:.5f} %')
 

@@ -5,10 +5,9 @@ import os
 
 from torch.utils.data.dataloader import DataLoader
 
-from utils.dataloading import get_dataset
-from utils.evaluation import evaluate_model
+import utils
+from utils import RunInfo
 from Model import get_model
-from utils.RunInfo import RunInfo
 
 evaluations_info_file = os.path.join(
 	"evaluations","evaluations.csv"
@@ -19,7 +18,7 @@ net_path = input("Specify path to model state dictionary (.pth file): ")
 model.network.load_state_dict(torch.load(net_path))
 network = model.network.to(config.DEVICE)
 
-validation_ds = get_dataset(
+validation_ds = utils.get_dataset(
     config.TEST_INFO, config.TEST, model.validation_transforms)
 
 val_dl = DataLoader(
@@ -39,7 +38,7 @@ run_info = RunInfo(
 	base_model_path=net_path
 )
 
-accuracy = evaluate_model(model, val_dl, save_path)*100
+accuracy = utils.evaluate_model(model, val_dl, save_path)*100
 run_info.set_test_accuracy(accuracy)
 print(f'Accuracy: {accuracy:.5f} %')
 

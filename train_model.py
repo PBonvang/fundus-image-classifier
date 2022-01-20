@@ -1,21 +1,16 @@
 #%% imports
 import shutil
 import uuid
-import config
-from utils.RunInfo import RunInfo
-from utils.dataloading import get_dataset
 import torch
 import os
 import sys
 from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
 from torch.utils.data.dataloader import DataLoader
 
 from Model import get_model
-from utils.IModel import IModel
-from utils.evaluation import evaluate_model
-from utils.training import train_model
-from utils.validation import model_is_valid
+import utils
+from utils import RunInfo, IModel
+import config
 
 ##################################################################
 #%%                    Model initialization
@@ -23,7 +18,7 @@ from utils.validation import model_is_valid
 print("[INFO] Initializing model")
 model = get_model()
 
-if not model_is_valid(model):
+if not utils.model_is_valid(model):
     raise TypeError(
         f"Model is missing attributes. Please define missing attributes and try again. Required attributes are defined in the {IModel.__name__} interface.")
 
@@ -71,9 +66,9 @@ print(f"Run id: ", run_id)
 run_path = os.path.join(trained_model_path, "runs", run_id)
 
 print("\n[INFO] Loading dataset")
-training_ds = get_dataset(
+training_ds = utils.get_dataset(
     config.TRAIN_INFO, config.TRAIN, model.training_transforms)
-test_ds = get_dataset(config.TEST_INFO, config.TEST,
+test_ds = utils.get_dataset(config.TEST_INFO, config.TEST,
                       model.validation_transforms)
 
 test_dl = DataLoader(
@@ -110,7 +105,7 @@ print("[INFO] Run prepared")
 ##################################################################
 print("\n[INFO] Training model")
 try:
-    train_model(model,
+    utils.train_model(model,
                 training_ds,
                 test_dl,
                 run_info,
@@ -125,7 +120,7 @@ print("[INFO] Training finished")
 print("\n[INFO] Evaluating model")
 acc = 0.0
 try:
-    acc = evaluate_model(model, test_dl, run_path)*100
+    acc = utils.evaluate_model(model, test_dl, run_path)*100
     print(f'Accuracy: {acc:.5f} %')
 except KeyboardInterrupt:
     print("Stopping evaluation...")

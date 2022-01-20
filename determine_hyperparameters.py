@@ -6,8 +6,6 @@ import shutil
 import os
 
 from torch.utils.data.dataloader import DataLoader
-from utils.RunInfo import RunInfo
-import utils.dataloading as dataloading
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
@@ -18,8 +16,8 @@ from optuna.study import StudyDirection
 
 from HyperModel import HyperModel
 import config
-from utils.training import train_one_epoch
-from utils.evaluation import get_sum_of_correct_predictions
+import utils
+from utils import RunInfo, train_one_epoch
 from display_study import print_top_5_trials
 
 # Configuration
@@ -47,7 +45,7 @@ def objective(trial: Trial):
         {network}
         """)
 
-    training_ds = dataloading.get_dataset(
+    training_ds = utils.get_dataset(
         config.TRAIN_INFO, config.TRAIN, transforms=model.training_transforms)
 
     run_info = RunInfo(
@@ -79,7 +77,7 @@ def objective(trial: Trial):
     # Evaluate model
     network.eval()
 
-    test_ds = dataloading.get_dataset(
+    test_ds = utils.get_dataset(
         config.TEST_INFO, config.TEST, transforms=model.validation_transforms)
 
     test_dl = DataLoader(
@@ -101,7 +99,7 @@ def objective(trial: Trial):
             loss = model.loss_func(output, target)
             val_loss.append(loss.detach().item())
 
-            correct += get_sum_of_correct_predictions(output, target)
+            correct += utils.get_sum_of_correct_predictions(output, target)
 
     avg_loss = sum(val_loss)/len(val_loss)
     accuracy = correct / min(len(test_dl.dataset), model.batch_size*N_VALID_BATCHES)
