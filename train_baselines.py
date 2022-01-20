@@ -5,7 +5,7 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data.dataloader import DataLoader
 
-from baseline_models import Densenet201, GNet, ResNet101, ResNet152
+from baseline_models import Densenet121, Densenet201, GNet, ResNet101, ResNet152
 from utils.RunInfo import RunInfo
 import utils.dataloading as dataloading
 import config
@@ -16,7 +16,7 @@ from utils.training import train_one_epoch
 EPOCHS = 50
 
 base_line_info_file = os.path.join("baselines","baselines.csv")
-baselines = [Densenet201, GNet, ResNet101, ResNet152]
+baselines = [Densenet121, Densenet201, GNet, ResNet101, ResNet152]
 models = [b.get_model() for b in baselines]
 
 training_ds = dataloading.get_dataset(
