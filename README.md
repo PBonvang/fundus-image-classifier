@@ -1,8 +1,8 @@
-# NN-experimenter
-A set of scripts and utility functions was made to make it easy to experiment with Neural Networks for the fundus dataset provided by StatuManu.
+# Fundus image-classifier
+A set of scripts and utility functions made to make it easy to experiment with different Neural Network architectures for the fundus dataset provided by StatuManu.
 
 ## Use
-Modified: 14/01/2022  
+Modified: 21/01/2022  
 
 ### Prerequisites
 1. Set environment config in [config.py](config.py)
@@ -13,23 +13,23 @@ Open [Model.py](Model.py) and define your model by following the instructions
     - Examples can be found under [models/examples](models/examples)
 
 ## Metadata
-The final step in the trainer script, saves the model, its blueprint and metadata.
+The final step in the trainer script, saves the model and the run information.
 
-The metadata includes attributes like learning rate, epochs, optimizer function...
-and can be found in [model_info.csv](model_info.csv).  
-This info file was designed to be used as a pandas dataframe or with excel to provide a searchable database.
+The metadata includes attributes like learning rate, epochs, samples seen, model base...
+and can be found in will be saved to the `MODELS_INFO_FILE` specified in [config.py](config.py).
+This info file was designed to be used as a [pandas](https://pandas.pydata.org/) dataframe or with excel to provide a searchable database.
 
 ### Training
-If the model has been set up correctly the model can be trained using [trainer.py](trainer.py)
+If the model has been set up correctly the model can be trained using [train_model.py](train_model.py)
 
 #### Training stats
-Training stats are saved as tensorboard runs located in the *runs* folder.  
+Training stats are saved as tensorboard events saved in the run folder, a subdirectory of the models directory specified in `MODELS_PATH` of [config.py](config.py).  
 To view the stats, open tensorboard and find your run.
 
 ## Dataset Weights
-If the dataset is build with [build_dataset.py](build_dataset.py) you'll find a info.txt file in the base of it, which included the pos_weight for the dataset.  
+If the dataset was build with [build_dataset.py](build_dataset.py) you'll find a info.txt file in the base of it, which included the `pos_weight` for the dataset.  
 
-pos_weight = num_neg_samples / num_pos_samples
+`pos_weight` is calculated as: $\frac{\text{\# neg samples}}{\text{\# pos samples}}$
 
 ## References
 - How can I replace the forward method of a predefined torchvision model with my customized forward function? - [discuss.pytorch.org](https://discuss.pytorch.org/t/how-can-i-replace-the-forward-method-of-a-predefined-torchvision-model-with-my-customized-forward-function/54224/7)

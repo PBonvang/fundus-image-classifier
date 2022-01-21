@@ -38,7 +38,7 @@ if load_existing:
 
     model_id: str = None
     try:
-        model_id = base_model_path.split(config.TRAINED_MODELS_PATH)[1]\
+        model_id = base_model_path.split(config.MODELS_PATH)[1]\
             .split(os.sep)[1]
 
         model_id_input = input(f"Input model id ({model_id}): ")
@@ -58,7 +58,7 @@ print("[INFO] Model initialized")
 #%%                    Prepare run
 ##################################################################
 print("\n[INFO] Preparing run")
-trained_model_path = os.path.join(config.TRAINED_MODELS_PATH, model.id)
+trained_model_path = os.path.join(config.MODELS_PATH, model.id)
 run_id = str(uuid.uuid4())
 
 print(f"Run id: ", run_id)
