@@ -32,7 +32,20 @@ If the dataset is build with [build_dataset.py](build_dataset.py) you'll find a 
 pos_weight = num_neg_samples / num_pos_samples
 
 ## References
-- Setting up a transfer learning network: https://discuss.pytorch.org/t/how-can-i-replace-the-forward-method-of-a-predefined-torchvision-model-with-my-customized-forward-function/54224/7
+- How can I replace the forward method of a predefined torchvision model with my customized forward function? - [discuss.pytorch.org](https://discuss.pytorch.org/t/how-can-i-replace-the-forward-method-of-a-predefined-torchvision-model-with-my-customized-forward-function/54224/7)
+- How to apply constraint to weights in convolutional layer? - [discuss.pytorch.org](https://discuss.pytorch.org/t/how-to-apply-constraint-to-weights-in-convolutional-layer/13856)
+- [MIT 6.S191 (2020): Convolutional Neural Networks](https://www.youtube.com/watch?v=iaSUYvmCekI&feature=youtu.be)
+- [TensorFlow. Intro to Machine Learning (ML Zero to Hero)](https://www.youtube.com/watch?v=KNAWp2S3w94)
+- [Christian Versloot. How to use K-fold Cross Validation with PyTorch? machinecurve.com, 2021](https://www.machinecurve.com/index.php/2021/02/03/how-to-use-k-fold-cross-validation-with-pytorch/)
+- [Adrian Rosebrock. PyTorch: Transfer Learning and Image Classification. pyimagesearch, 2021](https://www.pyimagesearch.com/2021/10/11/pytorch-transfer-learning-and-image-classification/)
+
+### Papers
+- [Asha Gnana Priya Henry and Anitha Jude. Convolutional neural-network-based classification of retinal images with
+different combinations of filtering techniques. Open Computer Science, 11(1):480–490, 2021.](https://www.degruyter.com/document/doi/10.1515/comp-2020-0177/html)
+- [Mikkel Schou Andersen, Christian Bonde Pedersen, and Frantz Rom Poulsen. A new novel method for assessing
+intracranial pressure using non-invasive fundus images: a pilot study. Scientific Reports, 10(1):13062, August 2020.](https://www.nature.com/articles/s41598-020-70084-0)
+- [Wouter Van Gansbeke and Simon Vandenhende and Stamatios Georgoulis and Marc Proesmans and Luc Van Gool. SCAN: Learning to Classify Images without Labels. 2020](https://arxiv.org/abs/2005.12320)
+
 
 ## Improvement ideas
 - Continue model training where it left off with epochs and perhaps steps
