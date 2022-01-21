@@ -13,18 +13,25 @@ from torch.nn import Module
 from torch.nn import BCEWithLogitsLoss
 from torch.optim import Adam
 
-from utils.IModel import IModel
 import config
-from utils.model import conv_output_shape
+import utils
+from utils import IModel
 
 class Network(Module):
     def __init__(self):
         super(Network, self).__init__()
 
+        ###########################################
+        # Filters
+        ###########################################
+
         self.blur = nn.Conv2d(in_channels=1, out_channels=1, kernel_size=3, padding=1, bias=False, stride=1)
         self.blur.weight = nn.Parameter(torch.ones((1,1,3,3))/9.0)
         self.blur.weight.requires_grad = False
 
+        ###########################################
+        # Network layers
+        ###########################################
         conv_layers = []
 
         in_shape = config.IMAGE_SHAPE
@@ -37,7 +44,7 @@ class Network(Module):
             MaxPool2d((2,2))
         ])
 
-        in_shape = conv_output_shape(in_shape, 3)
+        in_shape = utils.conv_output_shape(in_shape, 3)
         in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
 
         layer_2_features = 128
@@ -49,7 +56,7 @@ class Network(Module):
             MaxPool2d((2,2))
         ])
 
-        in_shape = conv_output_shape(in_shape, 3)
+        in_shape = utils.conv_output_shape(in_shape, 3)
         in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
 
         layer_3_features = 256
@@ -64,7 +71,7 @@ class Network(Module):
         self.conv_layers = Sequential(*conv_layers)
         lin_layers = []
 
-        in_shape = conv_output_shape(in_shape, 3)
+        in_shape = utils.conv_output_shape(in_shape, 3)
         in_shape = (np.floor(in_shape[0]/2), np.floor(in_shape[1]/2))
 
         in_features = int(np.prod(in_shape))*layer_3_features
@@ -88,17 +95,19 @@ class Network(Module):
 
         return x
 
-# END NETWORK DEFINITION
-
-# DEFINE MODEL HERE
 class Model(IModel):
-    # SET MODEL ATTRIBUTES HERE:
+    ###########################################
+    # Training attributes
+    ###########################################
     loss_func = BCEWithLogitsLoss(pos_weight=torch.tensor([config.DS_WEIGHT]).to(config.DEVICE))
     optimizer_func = Adam
     epochs = 500
     batch_size = 32
     lr = 0.0000022
-
+    
+    ###########################################
+    # Training preprocessing
+    ###########################################
     training_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
         transforms.Grayscale(),
@@ -108,12 +117,14 @@ class Model(IModel):
         transforms.GaussianBlur(3)
     ])
 
+    ###########################################
+    # Validation preprocessing
+    ###########################################
     validation_transforms = transforms.Compose([
         transforms.Resize(config.IMAGE_SHAPE),
         transforms.Grayscale(),
         transforms.ToTensor(),
     ])
-    # END MODEL ATTRIBUTES
 
     def __init__(self, network):
         super(Model, self).__init__()
@@ -122,11 +133,9 @@ class Model(IModel):
         self.optimizer = self.optimizer_func(
             self.network.parameters(),
             lr=self.lr)
-# END MODEL DEFINITION
 
 
 def get_model() -> IModel:
-    # INSTANTIATE MODEL HERE:
     network = Network()
 
     for param in network.parameters():
@@ -136,6 +145,5 @@ def get_model() -> IModel:
         param.requires_grad = False
 
     model = Model(network)
-    # END MODEL INSTANTIATION
 
     return model
